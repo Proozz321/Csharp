@@ -1,0 +1,25 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:dg="clr-namespace:Avalonia.Controls;assembly=Avalonia.Controls.DataGrid"
+        x:Class="OrderingSystemInterface.MainWindow"
+        Title="Ordering System"
+        Width="400" Height="300">
+
+        <StackPanel Margin="20" Spacing="10">
+          <TextBlock Text="Sistema de Encomendas"/>
+
+            <dg:DataGrid Name="Tabela" AutoGenerateColumns="False" IsReadOnly="True" x:CompileBindings="False" Margin="10">
+                <dg:DataGrid.Columns>
+                    <dg:DataGridTextColumn Header="Nome"       Binding="{ReflectionBinding [Nome]}"       Width="*"/>
+                    <dg:DataGridTextColumn Header="Preço"      Binding="{ReflectionBinding [Preco]}"      Width="*"/>
+                    <dg:DataGridTextColumn Header="Quantidade" Binding="{ReflectionBinding [Quantidade]}" Width="*"/>
+                </dg:DataGrid.Columns>
+            </dg:DataGrid>
+
+            <ListBox Name="Lista"/>
+            <ComboBox Name="Comb1" SelectedIndex = "0" MaxDropDownHeight="100"/>
+            <TextBox Name ="Input"/>
+            
+        </StackPanel>
+
+</Window>
