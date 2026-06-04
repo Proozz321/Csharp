@@ -2,24 +2,29 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:dg="clr-namespace:Avalonia.Controls;assembly=Avalonia.Controls.DataGrid"
         x:Class="OrderingSystemInterface.MainWindow"
-        Title="Ordering System"
-        Width="400" Height="300">
+        Title="Ordering System - Sistema de Encomendas"
+        Width="900" Height="600"
+        MinWidth="800" MinHeight="500">
 
-        <StackPanel Margin="20" Spacing="10">
-          <TextBlock Text="Sistema de Encomendas"/>
+    <Grid Margin="20" RowDefinitions="Auto,*,Auto,Auto" ColumnDefinitions="*,*">
+        
+        <!-- Título -->
+        <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"
+                   Text="Sistema de Encomendas" 
+                   FontSize="20" FontWeight="Bold" Margin="0,0,0,15"/>
 
-            <dg:DataGrid Name="Tabela" AutoGenerateColumns="False" IsReadOnly="True" x:CompileBindings="False" Margin="10">
+        <!-- Produtos Disponíveis -->
+        <StackPanel Grid.Row="1" Grid.Column="0" Spacing="10" Margin="0,0,10,0">
+            <TextBlock Text="Produtos Disponíveis" FontWeight="SemiBold"/>
+            <dg:DataGrid Name="ProdutosGrid" AutoGenerateColumns="False" 
+                         IsReadOnly="True" SelectionMode="Single">
                 <dg:DataGrid.Columns>
-                    <dg:DataGridTextColumn Header="Nome"       Binding="{ReflectionBinding [Nome]}"       Width="*"/>
-                    <dg:DataGridTextColumn Header="Preço"      Binding="{ReflectionBinding [Preco]}"      Width="*"/>
-                    <dg:DataGridTextColumn Header="Quantidade" Binding="{ReflectionBinding [Quantidade]}" Width="*"/>
+                    <dg:DataGridTextColumn Header="Produto" Binding="{Binding Nome}" Width="2*"/>
+                    <dg:DataGridTextColumn Header="Preço" Binding="{Binding Preco, StringFormat=C}" Width="*"/>
+                    <dg:DataGridTextColumn Header="Estoque" Binding="{Binding Quantidade}" Width="*"/>
                 </dg:DataGrid.Columns>
             </dg:DataGrid>
-
-            <ListBox Name="Lista"/>
-            <ComboBox Name="Comb1" SelectedIndex = "0" MaxDropDownHeight="100"/>
-            <TextBox Name ="Input"/>
-            
         </StackPanel>
 
-</Window>
+        <!-- Pedido Atual -->
+        <StackPanel Grid.Row="1"
