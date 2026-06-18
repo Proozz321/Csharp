@@ -1,0 +1,167 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:StudyPlanner.ViewModels"
+        x:Class="StudyPlanner.Views.MainWindow"
+        x:DataType="vm:MainViewModel"
+        Title="Study Planner" Width="960" Height="680"
+        Background="#13131f">
+
+  <DockPanel Margin="20">
+
+    <!-- Header -->
+    <StackPanel DockPanel.Dock="Top" Margin="0 0 0 20">
+      <Grid ColumnDefinitions="*,Auto">
+        <StackPanel>
+          <TextBlock Text="Plano de Estudos 2026–2027"
+                     FontSize="24" FontWeight="Medium" Foreground="#e0e0f0"/>
+          <TextBlock Text="{Binding TodayLabel}"
+                     FontSize="13" Foreground="#666" Margin="0 4 0 0"/>
+        </StackPanel>
+        <StackPanel Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center">
+          <TextBlock FontSize="28" FontWeight="Medium" HorizontalAlignment="Right">
+            <TextBlock.Foreground>
+              <SolidColorBrush Color="#e0e0f0"/>
+            </TextBlock.Foreground>
+            <Run Text="{Binding ProgressPercent}"/><Run Text="%"/>
+          </TextBlock>
+          <TextBlock Text="concluído" FontSize="11" Foreground="#555" HorizontalAlignment="Right"/>
+        </StackPanel>
+      </Grid>
+      <Border Background="#1a1a2e" CornerRadius="4" Height="8" Margin="0 12 0 0">
+        <Border CornerRadius="4" Height="8" HorizontalAlignment="Left"
+                Background="{Binding PhaseAccentColor}"
+                Width="{Binding ProgressBarWidth}"/>
+      </Border>
+    </StackPanel>
+
+    <!-- Phase tabs -->
+    <ItemsControl DockPanel.Dock="Top" ItemsSource="{Binding Phases}" Margin="0 0 0 16">
+      <ItemsControl.ItemsPanel>
+        <ItemsPanelTemplate>
+          <StackPanel Orientation="Horizontal" Spacing="8"/>
+        </ItemsPanelTemplate>
+      </ItemsControl.ItemsPanel>
+      <ItemsControl.ItemTemplate>
+        <DataTemplate>
+          <Button Content="{Binding Label}"
+                  Command="{Binding $parent[Window].DataContext.SelectPhaseCommand}"
+                  CommandParameter="{Binding}"
+                  Padding="16 8"
+                  FontSize="13"/>
+        </DataTemplate>
+      </ItemsControl.ItemTemplate>
+    </ItemsControl>
+
+    <!-- Phase info bar -->
+    <Border DockPanel.Dock="Top" Background="#1a1a2e" CornerRadius="8"
+            Padding="14 10" Margin="0 0 0 14">
+      <Grid ColumnDefinitions="*,Auto,Auto">
+        <StackPanel>
+          <TextBlock Text="{Binding SelectedPhase.Title}"
+                     FontSize="15" FontWeight="Medium" Foreground="#e0e0f0"/>
+          <TextBlock Text="{Binding SelectedPhase.Period}"
+                     FontSize="12" Foreground="#555" Margin="0 2 0 0"/>
+        </StackPanel>
+        <Border Grid.Column="1" Background="#22223a" CornerRadius="6"
+                Padding="10 5" Margin="0 0 8 0">
+          <TextBlock Text="{Binding SelectedPhase.Hours}"
+                     FontSize="12" Foreground="#888"/>
+        </Border>
+        <Border Grid.Column="2" Background="#22223a" CornerRadius="6" Padding="10 5">
+          <TextBlock Text="{Binding SelectedPhase.FinalProject}"
+                     FontSize="12" Foreground="#888"/>
+        </Border>
+      </Grid>
+    </Border>
+
+    <!-- Main content -->
+    <Grid ColumnDefinitions="260,*">
+
+      <!-- Week list -->
+      <ListBox Grid.Column="0"
+               ItemsSource="{Binding SelectedPhase.Weeks}"
+               SelectedItem="{Binding SelectedWeek}"
+               Background="Transparent"
+               Margin="0 0 14 0"
+               ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+        <ListBox.ItemTemplate>
+          <DataTemplate>
+            <Border Padding="10 8" CornerRadius="8" Margin="0 0 0 4">
+              <Grid ColumnDefinitions="4,*">
+                <!-- Accent bar -->
+                <Border Grid.Column="0" Width="4" CornerRadius="2" Margin="0 0 10 0"
+                        Background="{Binding $parent[Window].DataContext.PhaseAccentColor}"
+                        IsVisible="{Binding IsCurrent}"/>
+                <StackPanel Grid.Column="1">
+                  <Grid ColumnDefinitions="*,Auto">
+                    <TextBlock FontSize="11" Foreground="#555">
+                      <Run Text="Sem. "/>
+                      <Run Text="{Binding Number}"/>
+                    </TextBlock>
+                    <TextBlock Grid.Column="1" Text="● hoje" FontSize="10"
+                               Foreground="#4ecdc4" IsVisible="{Binding IsCurrent}"/>
+                  </Grid>
+                  <TextBlock Text="{Binding Dates}" FontSize="13"
+                             FontWeight="Medium" Foreground="#d0d0e8" Margin="0 2 0 0"/>
+                  <TextBlock Text="{Binding Focus}" FontSize="11"
+                             Foreground="#555" TextWrapping="Wrap" Margin="0 2 0 0"/>
+                </StackPanel>
+              </Grid>
+            </Border>
+          </DataTemplate>
+        </ListBox.ItemTemplate>
+      </ListBox>
+
+      <!-- Week detail -->
+      <ScrollViewer Grid.Column="1" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel>
+          <TextBlock Text="{Binding SelectedWeek.Focus}"
+                     FontSize="18" FontWeight="Medium"
+                     Foreground="#e0e0f0" TextWrapping="Wrap"/>
+          <TextBlock Text="{Binding SelectedWeek.Dates}"
+                     FontSize="12" Foreground="#555" Margin="0 4 0 16"/>
+
+          <ItemsControl ItemsSource="{Binding SelectedWeek.Days}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <Border CornerRadius="10" Margin="0 0 0 8"
+                        Background="#1a1a2e">
+                  <ToolTip.Tip>
+                    <Border MaxWidth="360" Padding="12 10"
+                            Background="#0d0d1a" CornerRadius="8">
+                      <StackPanel Spacing="6">
+                        <TextBlock Text="{Binding Task}"
+                                   FontSize="13" FontWeight="Medium"
+                                   Foreground="#e0e0f0" TextWrapping="Wrap"/>
+                        <TextBlock Text="{Binding Description}"
+                                   FontSize="12" Foreground="#aaa"
+                                   TextWrapping="Wrap" LineHeight="18"/>
+                      </StackPanel>
+                    </Border>
+                  </ToolTip.Tip>
+                  <Grid ColumnDefinitions="70,*,Auto" Margin="12 10">
+                    <Border Grid.Column="0" Background="#22223a"
+                            CornerRadius="6" Padding="6 4"
+                            HorizontalAlignment="Left" VerticalAlignment="Center">
+                      <TextBlock Text="{Binding Day}" FontSize="11"
+                                 Foreground="{Binding $parent[Window].DataContext.PhaseAccentColor}"
+                                 FontWeight="Medium"/>
+                    </Border>
+                    <TextBlock Grid.Column="1" Text="{Binding Task}"
+                               FontSize="13" Foreground="#c0c0d8"
+                               TextWrapping="Wrap" VerticalAlignment="Center"
+                               Margin="10 0"/>
+                    <CheckBox Grid.Column="2"
+                              IsChecked="{Binding IsCompleted}"
+                              VerticalAlignment="Center"/>
+                  </Grid>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </ScrollViewer>
+
+    </Grid>
+  </DockPanel>
+</Window>
