@@ -1,85 +1,1267 @@
-using System.Text.Json;
-using System.Text.Json.Serialization;
+using StudyPlanner.Models;
 
 namespace StudyPlanner.Models;
 
 public static class StudyData
 {
-    private static readonly JsonSerializerOptions JsonOptions = new()
-    {
-        PropertyNameCaseInsensitive = true,
-        Converters = { new JsonStringEnumConverter() }
-    };
-
-    private static List<Phase>? _cachedPhases;
-    private static readonly object _lock = new();
-
     public static List<Phase> GetPhases()
     {
-        if (_cachedPhases is not null)
-            return _cachedPhases;
+        var today = DateTime.Today;
 
-        lock (_lock)
+        var phases = new List<Phase>
         {
-            if (_cachedPhases is not null)
-                return _cachedPhases;
-
-            // Assumes the JSON file is in the output directory (bin)
-            // For web apps, use wwwroot or content root
-            var jsonPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "studyplan.json");
-            
-            if (!File.Exists(jsonPath))
+            new Phase
             {
-                // Fallback for development: try relative path
-                jsonPath = Path.Combine(Directory.GetCurrentDirectory(), "studyplan.json");
-            }
-
-            var json = File.ReadAllText(jsonPath);
-            
-            var phases = JsonSerializer.Deserialize<List<Phase>>(json, JsonOptions)
-                         ?? new List<Phase>();
-
-            // Calculate IsCurrent and IsDone based on Week Start/End dates
-            var today = DateTime.Today;
-            int uniqueId = 1;
-
-            foreach (var phase in phases)
-            {
-                foreach (var week in phase.Weeks)
+                Id = 1,
+                Label = "Fase 1",
+                Title = "C# Avançado + Git",
+                Period = "18/05/2026 – 19/07/2026",
+                Hours = "18–22h/sem",
+                FinalProject = "Sistema Completo em C# Puro",
+                AccentColor = "#7c7cff",
+                SymbolicCertificateTitle = "Certificado de Conclusão — C# Avançado e Boas Práticas",
+                SymbolicCertificateDescription = "Atesta a conclusão das 8 semanas de C# avançado: SOLID, LINQ, Async/Await, Injecção de Dependência, Mediator, Strategy/Observer, Reflection, Source Generators, TDD com xUnit/Moq, e um Processador Batch Assíncrono completo como projecto final.",
+                RealCertificationName = "Foundational C# Certification",
+                RealCertificationProvider = "Microsoft + freeCodeCamp",
+                RealCertificationUrl = "https://www.freecodecamp.org/learn/foundational-c-sharp-with-microsoft",
+                Weeks = new List<Week>
                 {
-                    // Dates are stored as ISO strings (yyyy-MM-dd)
-                    if (DateTime.TryParse(week.StartDate, out var start) &&
-                        DateTime.TryParse(week.EndDate, out var end))
-                    {
-                        week.IsCurrent = today >= start && today <= end;
-                        week.IsDone = today > end;
-                    }
-                    else
-                    {
-                        // Fallback: if dates are missing or invalid, mark as false
-                        week.IsCurrent = false;
-                        week.IsDone = false;
-                    }
-
-                    // Assign UniqueId to each day
-                    foreach (var day in week.Days)
-                    {
-                        day.UniqueId = uniqueId++;
-                    }
+                    new Week { Number=1, Dates="18–24 Mai", Focus="Herança, Interfaces, Classes Abstratas, SOLID",
+                        Days=new(){
+                            new(){ Day="Seg", Task="Herança + Interfaces",
+                                Description="Compreender o conceito de Herança para reaproveitamento de código e criar as primeiras Interfaces para definir contratos obrigatórios entre classes.",
+                                DocUrl="https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/object-oriented/inheritance", DocLabel="Microsoft Learn: Inheritance in C#",
+                                PracticeUrl="https://leetcode.com/problems/design-parking-system/", PracticeLabel="LeetCode: Design Parking System (1603)" },
+                            new(){ Day="Ter", Task="Classes Abstratas",
+                                Description="Implementar Classes Abstratas para modelar conceitos que não devem ser instanciados diretamente, combinando métodos concretos e abstratos.",
+                                DocUrl="https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/abstract", DocLabel="Microsoft Learn: Abstract keyword",
+                                PracticeUrl="https://leetcode.com/problems/design-hashmap/", PracticeLabel="LeetCode: Design HashMap (706)" },
+                            new(){ Day="Qua", Task="SOLID SRP + OCP",
+                                Description="Estudar o SOLID, focando no SRP (Responsabilidade Única) e OCP (Aberto/Fechado) para criar classes com funções únicas e fáceis de estender.",
+                                DocUrl="https://learn.microsoft.com/en-us/dotnet/architecture/microservices/microservice-ddd-cqrs-patterns/microservice-application-layer-web-api-design", DocLabel="Microsoft Learn: SOLID Principles (.NET Microservices)",
+                                PracticeUrl="https://leetcode.com/problems/design-underground-system/", PracticeLabel="LeetCode: Design Underground System (1396)" },
+                            new(){ Day="Qui", Task="SOLID LSP+ISP+DIP",
+                                Description="Aplicar o LSP (Substituição de Liskov), ISP (Segregação de Interfaces) e DIP (Inversão de Dependência) para desacoplar as camadas do software.",
+                                DocUrl="https://learn.microsoft.com/en-us/dotnet/architecture/microservices/microservice-ddd-cqrs-patterns/microservice-application-layer-web-api-design", DocLabel="Microsoft Learn: SOLID Principles (.NET Microservices)",
+                                PracticeUrl="https://leetcode.com/problems/design-circular-queue/", PracticeLabel="LeetCode: Design Circular Queue (622)" },
+                            new(){ Day="Sex", Task="Projecto: Sistema de Pedidos",
+                                Description="Unir os conceitos da semana no projecto prático 'Sistema de Pedidos', aplicando as regras do SOLID na estrutura das classes.",
+                                DocUrl="https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/object-oriented/", DocLabel="Microsoft Learn: Object-Oriented Programming in C#" },
+                            new(){ Day="Sáb", Task="Git: README + Push",
+                                Description="Configurar o repositório Git do projecto, escrever um README detalhado explicando a arquitectura e realizar o primeiro Push para o GitHub.",
+                                DocUrl="https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax", DocLabel="GitHub Docs: Markdown para README" }
+                        }},
+                    new Week { Number=2, Dates="25–31 Mai", Focus="Records, Pattern Matching, LINQ",
+                        Days=new(){
+                            new(){ Day="Seg", Task="Records + Pattern Matching",
+                                Description="Explorar a imutabilidade com Records e utilizar o Pattern Matching para simplificar fluxos condicionais complexos de forma elegante.",
+                                DocUrl="https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/types/records", DocLabel="Microsoft Learn: C# Record Types",
+                                PracticeUrl="https://leetcode.com/problems/unique-paths/", PracticeLabel="LeetCode: Unique Paths (62)" },
+                            new(){ Day="Ter", Task="LINQ Básico",
+                                Description="Introdução ao LINQ utilizando a sintaxe de método e consulta para filtrar e ordenar coleções de dados básicas.",
+                                DocUrl="https://learn.microsoft.com/en-us/dotnet/csharp/linq/", DocLabel="Microsoft Learn: LINQ (C#)",
+                                PracticeUrl="https://leetcode.com/problems/two-sum/", PracticeLabel="LeetCode: Two Sum (1)" },
+                            new(){ Day="Qua", Task="GroupBy + Joins",
+                                Description="Avançar no LINQ com operações de agrupamento (GroupBy) e junções (Join) entre diferentes fontes de dados na memória.",
+                                DocUrl="https://learn.microsoft.com/en-us/dotnet/csharp/linq/", DocLabel="Microsoft Learn: LINQ (C#) — GroupBy/Join",
+                                PracticeUrl="https://leetcode.com/problems/group-anagrams/", PracticeLabel="LeetCode: Group Anagrams (49)" },
+                            new(){ Day="Qui", Task="LINQ Avançado",
+                                Description="Dominar recursos avançados do LINQ como SelectMany, paginação com Skip/Take e projeções de dados complexas.",
+                                DocUrl="https://learn.microsoft.com/en-us/dotnet/csharp/linq/", DocLabel="Microsoft Learn: LINQ (C#)",
+                                PracticeUrl="https://leetcode.com/problems/flatten-2d-vector/", PracticeLabel="LeetCode: Flatten 2D Vector (251)" },
+                            new(){ Day="Sex", Task="Expandir Projecto S1",
+                                Description="Expandir o Sistema de Pedidos da Semana 1, integrando consultas LINQ avançadas para gerar relatórios e estatísticas dos pedidos.",
+                                DocUrl="https://learn.microsoft.com/en-us/dotnet/csharp/linq/", DocLabel="Microsoft Learn: LINQ (C#)" },
+                            new(){ Day="Sáb", Task="Revisão",
+                                Description="Revisar os códigos criados, caçar possíveis gargalos de performance nas consultas e documentar os novos aprendizados no repositório." }
+                        }},
+                    new Week { Number=3, Dates="01–07 Jun", Focus="Async/Await, Delegates, Events",
+                        Days=new(){
+                            new(){ Day="Seg", Task="Async/Await Básico",
+                                Description="Entender os conceitos de concorrência com async e await, aprendendo como libertar a thread principal durante operações pesadas de I/O.",
+                                DocUrl="https://learn.microsoft.com/en-us/dotnet/csharp/asynchronous-programming/task-asynchronous-programming-model", DocLabel="Microsoft Learn: Task Asynchronous Programming (TAP)",
+                                PracticeUrl="https://leetcode.com/problems/design-bounded-blocking-queue/", PracticeLabel="LeetCode: Design Bounded Blocking Queue (1188)" },
+                            new(){ Day="Ter", Task="Task + CancellationToken",
+                                Description="Manipular a classe Task em paralelo e implementar o CancellationToken para abortar operações assíncronas quando necessário.",
+                                DocUrl="https://learn.microsoft.com/en-us/dotnet/csharp/asynchronous-programming/async-scenarios", DocLabel="Microsoft Learn: Asynchronous Programming Scenarios",
+                                PracticeUrl="https://leetcode.com/problems/web-crawler-multithreaded/", PracticeLabel="LeetCode: Web Crawler Multithreaded (1242)" },
+                            new(){ Day="Qua", Task="Delegates, Func, Action",
+                                Description="Descobrir o funcionamento de Delegates e os tipos genéricos do sistema Func e Action para passar métodos como parâmetros.",
+                                DocUrl="https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/delegates/using-delegates", DocLabel="Microsoft Learn: Using Delegates",
+                                PracticeUrl="https://leetcode.com/problems/design-add-and-search-words-data-structure/", PracticeLabel="LeetCode: Design Add and Search Words (211)" },
+                            new(){ Day="Qui", Task="Events",
+                                Description="Implementar a comunicação baseada em eventos usando Events e EventHandler para criar sistemas fracamente acoplados e reativos.",
+                                DocUrl="https://learn.microsoft.com/en-us/dotnet/csharp/events-overview", DocLabel="Microsoft Learn: Introduction to Events",
+                                PracticeUrl="https://leetcode.com/problems/design-a-todo-list/", PracticeLabel="LeetCode: Design a Todo List (1797)" },
+                            new(){ Day="Sex", Task="App consumindo API pública",
+                                Description="Desenvolver uma aplicação de consola assíncrona que consome uma API pública de sua escolha, manipulando as respostas JSON.",
+                                DocUrl="https://learn.microsoft.com/en-us/dotnet/csharp/asynchronous-programming/", DocLabel="Microsoft Learn: Asynchronous Programming (C#)" },
+                            new(){ Day="Sáb", Task="Git: Push",
+                                Description="Organizar as branches do Git, realizar o merge das funcionalidades assíncronas na branch principal e efectuar o Push do progresso." }
+                        }},
+                    new Week { Number=4, Dates="15–21 Jun", Focus="DI, IoC Container e Desacoplamento com Mediator",
+                        Days=new(){
+                            new(){ Day="Seg", Task="Inversão de Dependência (DIP) + Container",
+                                Description="Estudar o DIP na prática e aprender a configurar o Microsoft.Extensions.DependencyInjection para gerir o ciclo de vida dos objectos.",
+                                DocUrl="https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection/overview", DocLabel="Microsoft Learn: Dependency Injection in .NET",
+                                PracticeUrl="https://leetcode.com/problems/design-an-ordered-stream/", PracticeLabel="LeetCode: Design an Ordered Stream (1825)" },
+                            new(){ Day="Ter", Task="Ciclos de Vida: Transient, Scoped, Singleton",
+                                Description="Dominar a diferença crucial entre os ciclos de vida do container de DI e quando aplicar cada um para evitar memory leaks.",
+                                DocUrl="https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection/usage", DocLabel="Microsoft Learn: DI Service Lifetimes (Usage)",
+                                PracticeUrl="https://leetcode.com/problems/design-browser-history/", PracticeLabel="LeetCode: Design Browser History (1472)" },
+                            new(){ Day="Qua", Task="Refatorar Sistema de Pedidos com DI",
+                                Description="Substituir todas as instanciações manuais (new) do Sistema de Pedidos por Injecção de Dependência via Construtor.",
+                                DocUrl="https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection/basics", DocLabel="Microsoft Learn: DI Basics Quickstart" },
+                            new(){ Day="Qui", Task="Design Pattern: Mediator (MediatR)",
+                                Description="Introduzir o padrão Mediator usando a biblioteca MediatR para desacoplamento total entre o envio de comandos e a execução da lógica.",
+                                DocUrl="https://github.com/LuckyPennySoftware/MediatR", DocLabel="GitHub: MediatR (repositório oficial)",
+                                PracticeUrl="https://leetcode.com/problems/design-a-stack-with-increment-operation/", PracticeLabel="LeetCode: Design a Stack With Increment Operation (1381)" },
+                            new(){ Day="Sex", Task="Projecto: Handlers no Sistema de Pedidos",
+                                Description="Implementar Command Handlers para processar as acções do sistema, limpando os serviços e centralizando as responsabilidades.",
+                                DocUrl="https://github.com/LuckyPennySoftware/MediatR", DocLabel="GitHub: MediatR (repositório oficial)" },
+                            new(){ Day="Sáb", Task="Git: Documentar DI + Push",
+                                Description="Explicar no README os benefícios da Injecção de Dependência e do Mediator na arquitectura do projecto e realizar o Push." }
+                        }},
+                    new Week { Number=5, Dates="22–28 Jun", Focus="Design Patterns Comportamentais Modernos",
+                        Days=new(){
+                            new(){ Day="Seg", Task="Strategy Pattern para Regras Flexíveis",
+                                Description="Implementar o Strategy para isolar algoritmos intercambiáveis de cálculo de descontos e taxas, integrando-o com o container de DI.",
+                                DocUrl="https://refactoring.guru/design-patterns/strategy/csharp/example", DocLabel="Refactoring Guru: Strategy Pattern (C#)",
+                                PracticeUrl="https://leetcode.com/problems/design-parking-system/", PracticeLabel="LeetCode: Design Parking System (1603)" },
+                            new(){ Day="Ter", Task="Observer Pattern com C# Events",
+                                Description="Utilizar o Observer através de Events e EventHandler do C# para disparar notificações automáticas sempre que um pedido mudar de estado.",
+                                DocUrl="https://refactoring.guru/design-patterns/observer", DocLabel="Refactoring Guru: Observer Pattern",
+                                PracticeUrl="https://leetcode.com/problems/design-twitter/", PracticeLabel="LeetCode: Design Twitter (355)" },
+                            new(){ Day="Qua", Task="Comunicação Assíncrona e Eventos",
+                                Description="Combinar os Eventos do C# com as tarefas assíncronas (Async/Await) estudadas na Semana 3 para processamento não-bloqueante.",
+                                DocUrl="https://learn.microsoft.com/en-us/dotnet/csharp/asynchronous-programming/task-asynchronous-programming-model", DocLabel="Microsoft Learn: Task Asynchronous Programming (TAP)" },
+                            new(){ Day="Qui", Task="Projecto: Expandir com Strategy e Events",
+                                Description="Adicionar múltiplas regras de desconto (Vip, Sazonal) usando Strategy e criar listeners para envio de e-mails simulados via Eventos.",
+                                DocUrl="https://refactoring.guru/design-patterns/strategy/csharp/example", DocLabel="Refactoring Guru: Strategy Pattern (C#)" },
+                            new(){ Day="Sex", Task="Revisão de Código e Concorrência",
+                                Description="Analisar possíveis condições de corrida (Race Conditions) ao disparar eventos assíncronos em paralelo e garantir a segurança das threads.",
+                                DocUrl="https://learn.microsoft.com/en-us/dotnet/standard/threading/managed-threading-best-practices", DocLabel="Microsoft Learn: Managed Threading Best Practices",
+                                PracticeUrl="https://leetcode.com/problems/print-in-order/", PracticeLabel="LeetCode: Print in Order (1114)" },
+                            new(){ Day="Sáb", Task="Git: README Actualizado + Push",
+                                Description="Documentar os padrões comportamentais aplicados e os cuidados tomados com a assincronicidade antes de fazer o Push." }
+                        }},
+                    new Week { Number=6, Dates="29 Jun–05 Jul", Focus="Meta-programming: Reflection e C# Moderno",
+                        Days=new(){
+                            new(){ Day="Seg", Task="Reflection: Inspecção de Tipos em Runtime",
+                                Description="Utilizar System.Reflection para ler metadados, propriedades e métodos de classes dinamicamente em tempo de execução.",
+                                DocUrl="https://learn.microsoft.com/en-us/dotnet/csharp/advanced-topics/reflection-and-attributes/", DocLabel="Microsoft Learn: Attributes and Reflection",
+                                PracticeUrl="https://leetcode.com/problems/design-hashset/", PracticeLabel="LeetCode: Design HashSet (705)" },
+                            new(){ Day="Ter", Task="Attributes Personalizados",
+                                Description="Criar Attributes customizados (ex: [Obrigatorio], [TamanhoMaximo]) para marcar propriedades que necessitam de validação especial.",
+                                DocUrl="https://learn.microsoft.com/en-us/dotnet/csharp/advanced-topics/reflection-and-attributes/accessing-attributes-by-using-reflection", DocLabel="Microsoft Learn: Accessing Attributes Using Reflection" },
+                            new(){ Day="Qua", Task="Projecto: Mini-framework de Validação",
+                                Description="Desenvolver um validador genérico que recebe qualquer classe e valida as suas propriedades com base nos Attributes via Reflection.",
+                                DocUrl="https://learn.microsoft.com/en-us/dotnet/csharp/advanced-topics/reflection-and-attributes/accessing-attributes-by-using-reflection", DocLabel="Microsoft Learn: Accessing Attributes Using Reflection" },
+                            new(){ Day="Qui", Task="O C# Moderno: Source Generators",
+                                Description="Compreender o conceito de Source Generators (geração de código em tempo de compilação) e como substitui o Reflection por performance e suporte a AOT.",
+                                DocUrl="https://learn.microsoft.com/en-us/dotnet/csharp/roslyn-sdk/", DocLabel="Microsoft Learn: .NET Compiler Platform SDK (Source Generators)",
+                                PracticeUrl="https://leetcode.com/problems/design-compressed-string-iterator/", PracticeLabel="LeetCode: Design Compressed String Iterator (604)" },
+                            new(){ Day="Sex", Task="Análise de Performance e Expression Trees",
+                                Description="Avaliar o impacto de performance do Reflection puro, entender a base de Expression Trees e documentar alternativas modernas.",
+                                DocUrl="https://learn.microsoft.com/en-us/dotnet/standard/serialization/system-text-json/reflection-vs-source-generation", DocLabel="Microsoft Learn: Reflection vs Source Generation (Performance)" },
+                            new(){ Day="Sáb", Task="Documentação Técnica + Push",
+                                Description="Escrever um guia de uso do mini-framework de validação, alertando sobre os prós e contras de performance, e fazer Push." }
+                        }},
+                    new Week { Number=7, Dates="06–12 Jul", Focus="Engenharia de Testes (xUnit, Moq e Integração)",
+                        Days=new(){
+                            new(){ Day="Seg", Task="xUnit Avançado: Fact e Theory",
+                                Description="Configurar testes parametrizados complexos usando Theory, InlineData e MemberData para validar múltiplos cenários com um único método.",
+                                DocUrl="https://xunit.net/docs/getting-started/v3/getting-started", DocLabel="xUnit.net: Getting Started",
+                                PracticeUrl="https://leetcode.com/problems/find-median-from-data-stream/", PracticeLabel="LeetCode: Find Median from Data Stream (295)" },
+                            new(){ Day="Ter", Task="Introdução Prática ao TDD",
+                                Description="Aplicar o fluxo Red-Green-Refactor (TDD) para criar novas regras de validação no Sistema de Pedidos, escrevendo o teste primeiro.",
+                                DocUrl="https://learn.microsoft.com/en-us/dotnet/core/testing/", DocLabel="Microsoft Learn: Testing in .NET (TDD)" },
+                            new(){ Day="Qua", Task="Moq Avançado: Isolando Dependências",
+                                Description="Utilizar a biblioteca Moq para mockar os Handlers do Mediator e as Interfaces do Strategy, garantindo testes de unidade 100% isolados.",
+                                DocUrl="https://github.com/devlooped/moq/wiki/Quickstart", DocLabel="Moq: Quickstart Guide",
+                                PracticeUrl="https://leetcode.com/problems/design-skiplist/", PracticeLabel="LeetCode: Design Skiplist (1206)" },
+                            new(){ Day="Qui", Task="Introdução a Testes de Integração",
+                                Description="Entender a diferença entre testes de unidade e de integração, criando testes que validam a persistência simulada em ficheiros ou memória.",
+                                DocUrl="https://learn.microsoft.com/en-us/aspnet/core/test/integration-tests?view=aspnetcore-10.0", DocLabel="Microsoft Learn: Integration Tests in ASP.NET Core" },
+                            new(){ Day="Sex", Task="Testar o Mini-framework de Validação",
+                                Description="Criar uma suíte robusta de testes para o validador da Semana 6, cobrindo cenários extremos de erro e tipos de dados inesperados.",
+                                DocUrl="https://xunit.net/docs/getting-started/v3/getting-started", DocLabel="xUnit.net: Getting Started" },
+                            new(){ Day="Sáb", Task="Relatório de Cobertura (Mínimo 80%) + Push",
+                                Description="Gerar relatórios de code coverage, identificar e cobrir lacunas no código e realizar o Push com a suíte de testes 100% verde." }
+                        }},
+                    new Week { Number=8, Dates="13–19 Jul", Focus="Projecto Final: Processador Batch Assíncrono",
+                        Days=new(){
+                            new(){ Day="Seg", Task="Arquitectura do Processador em Lote",
+                                Description="Desenhar a arquitectura de um sistema que lê grandes volumes de dados (ex: CSV/JSON), valida e processa de forma concorrente.",
+                                DocUrl="https://learn.microsoft.com/en-us/dotnet/csharp/asynchronous-programming/", DocLabel="Microsoft Learn: Asynchronous Programming (C#)" },
+                            new(){ Day="Ter", Task="Implementação do Core (Leitura e Records)",
+                                Description="Desenvolver o motor de leitura assíncrona usando IAsyncEnumerable e fazer o parsing dos dados para Records imutáveis.",
+                                DocUrl="https://learn.microsoft.com/en-us/dotnet/csharp/asynchronous-programming/generate-consume-asynchronous-stream", DocLabel="Microsoft Learn: Generate and Consume Async Streams",
+                                PracticeUrl="https://leetcode.com/problems/design-file-system/", PracticeLabel="LeetCode: Design File System (1166)" },
+                            new(){ Day="Qua", Task="Processamento Paralelo + Validação",
+                                Description="Integrar o mini-framework da Semana 6 para validar os dados em paralelo e aplicar as estratégias de negócio da Semana 5.",
+                                DocUrl="https://learn.microsoft.com/en-us/dotnet/standard/threading/managed-threading-best-practices", DocLabel="Microsoft Learn: Managed Threading Best Practices" },
+                            new(){ Day="Qui", Task="Cobertura de Testes (xUnit + Moq)",
+                                Description="Garantir a confiabilidade do processador batch criando testes de unidade para os componentes e testes de integração para o fluxo de ficheiros.",
+                                DocUrl="https://learn.microsoft.com/en-us/aspnet/core/test/integration-tests?view=aspnetcore-10.0", DocLabel="Microsoft Learn: Integration Tests in ASP.NET Core" },
+                            new(){ Day="Sex", Task="Tratamento de Erros Resiliente e Logs",
+                                Description="Implementar um sistema robusto de captura de excepções assíncronas para que uma falha numa linha não derrube o processamento em lote.",
+                                DocUrl="https://learn.microsoft.com/en-us/dotnet/csharp/asynchronous-programming/", DocLabel="Microsoft Learn: Asynchronous Programming (C#)",
+                                PracticeUrl="https://leetcode.com/problems/design-circular-deque/", PracticeLabel="LeetCode: Design Circular Deque (641)" },
+                            new(){ Day="Sáb", Task="Portfólio C# + Tag v1.0 🎉",
+                                Description="Publicar o projecto com um caso de estudo detalhado no GitHub, incluindo métricas de performance e diagramas de concorrência. Tag v1.0 feita!" }
+                        }},
                 }
-            }
+            },
+            new Phase
+            {
+                Id = 2,
+                Label = "Fase 2",
+                Title = "JS + TS + React + Next.js 15",
+                Period = "20/07/2026 – 08/11/2026",
+                Hours = "20–24h/sem",
+                FinalProject = "Aplicação Full-Stack Completa",
+                AccentColor = "#4ecdc4",
+                Weeks = new List<Week>
+                {
+                    new Week { Number=9, Dates="20–26 Jul", Focus="JS Moderno (ES6+)",
+                        Days=new(){
+                            new(){ Day="Seg", Task="let, const, Arrow Functions",
+                                Description="Revisar escopos de variáveis (let, const), Arrow Functions e os conceitos fundamentais de closures no JavaScript.",
+                                DocUrl="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/Arrow_functions", DocLabel="MDN: Arrow Function Expressions",
+                                PracticeUrl="https://leetcode.com/problems/counter/", PracticeLabel="LeetCode: Counter (2620, closures)" },
+                            new(){ Day="Ter", Task="Desestruturação + Spread",
+                                Description="Dominar a desestruturação de arrays e objectos, além de explorar o uso dos operadores Rest e Spread no cotidiano.",
+                                DocUrl="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Destructuring_assignment", DocLabel="MDN: Destructuring Assignment",
+                                PracticeUrl="https://leetcode.com/problems/array-prototype-last/", PracticeLabel="LeetCode: Array Prototype Last (2619)" },
+                            new(){ Day="Qua", Task="map, filter, reduce",
+                                Description="Estudar e praticar métodos funcionais de manipulação de arrays como map, filter, reduce, find e every.",
+                                DocUrl="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map", DocLabel="MDN: Array.prototype.map()",
+                                PracticeUrl="https://leetcode.com/problems/array-reduce-transformation/", PracticeLabel="LeetCode: Array Reduce Transformation (2626)" },
+                            new(){ Day="Qui", Task="Módulos ES6",
+                                Description="Compreender módulos no JavaScript moderno utilizando as directivas de importação e exportação (import/export).",
+                                DocUrl="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules", DocLabel="MDN: JavaScript Modules Guide" },
+                            new(){ Day="Sex", Task="Projecto: Manipulador de Vendas",
+                                Description="Criar o projecto prático 'Manipulador de Vendas', utilizando puramente lógica JS funcional para filtrar e somar métricas de objectos.",
+                                DocUrl="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/reduce", DocLabel="MDN: Array.prototype.reduce()" },
+                            new(){ Day="Sáb", Task="Push + README",
+                                Description="Versionar o script, criar um README descritivo das operações matemáticas realizadas e fazer o push para o GitHub." }
+                        }},
+                    new Week { Number=10, Dates="27 Jul–02 Ago", Focus="Async JS + Fetch + DOM",
+                        Days=new(){
+                            new(){ Day="Seg", Task="Event Loop + Promises",
+                                Description="Compreender o Event Loop do JavaScript, Promessas (Promises), e os blocos de execução síncronos versus assíncronos.",
+                                DocUrl="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Using_promises", DocLabel="MDN: Using Promises",
+                                PracticeUrl="https://leetcode.com/problems/promise-time-limit/", PracticeLabel="LeetCode: Promise Time Limit (2621)" },
+                            new(){ Day="Ter", Task="async/await + try/catch",
+                                Description="Reescrever fluxos assíncronos utilizando a sintaxe moderna de async e await combinada com blocos try/catch para erros.",
+                                DocUrl="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/async_function", DocLabel="MDN: async function",
+                                PracticeUrl="https://leetcode.com/problems/sleep/", PracticeLabel="LeetCode: Sleep (2621)" },
+                            new(){ Day="Qua", Task="fetch API",
+                                Description="Utilizar a API nativa fetch para realizar requisições HTTP (GET, POST) para APIs externas e tratar os dados retornados.",
+                                DocUrl="https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch", DocLabel="MDN: Using the Fetch API" },
+                            new(){ Day="Qui", Task="Manipulação do DOM",
+                                Description="Manipular o DOM de forma nativa para injectar, alterar elementos e escutar eventos de clique e digitação do utilizador dinamicamente.",
+                                DocUrl="https://developer.mozilla.org/en-US/docs/Web/API/Document/querySelector", DocLabel="MDN: Document.querySelector()" },
+                            new(){ Day="Sex", Task="Projecto: Cotação de Moedas",
+                                Description="Desenvolver o app 'Cotação de Moedas', capturando dados em tempo real de uma API de economia e renderizando os cards na tela.",
+                                DocUrl="https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch", DocLabel="MDN: Using the Fetch API" },
+                            new(){ Day="Sáb", Task="Push GitHub Pages",
+                                Description="Subir o projecto front-end estático para o GitHub, garantindo que a chave da API (se houver) esteja protegida ou documentada." }
+                        }},
+                    new Week { Number=11, Dates="03–09 Ago", Focus="TypeScript Básico",
+                        Days=new(){
+                            new(){ Day="Seg", Task="Setup TypeScript + tsconfig",
+                                Description="Entender o papel do TypeScript na produtividade, instalar o compilador tsc e configurar o ficheiro básico tsconfig.json." },
+                            new(){ Day="Ter", Task="Tipagem estática",
+                                Description="Praticar a tipagem estática de variáveis primitivas, arrays, funções, parâmetros e retornos explícitos de métodos." },
+                            new(){ Day="Qua", Task="Interfaces + Type Aliases",
+                                Description="Criar e diferenciar Interfaces e Type Aliases para modelar a estrutura de objectos complexos na aplicação." },
+                            new(){ Day="Qui", Task="Union Types",
+                                Description="Estudar os tipos utilitários iniciais e aplicar Uniões de Tipos (Union Types) para aceitar dados flexíveis com segurança." },
+                            new(){ Day="Sex", Task="Migrar S9 para TS",
+                                Description="Migrar e refatorar o projecto 'Manipulador de Vendas' (Semana 9) de JavaScript puro para TypeScript, eliminando tipos implícitos any." },
+                            new(){ Day="Sáb", Task="Build + Commit",
+                                Description="Corrigir possíveis erros de compilação do TypeScript, rodar o build de produção e commitar o projecto tipado." }
+                        }},
+                    new Week { Number=12, Dates="10–16 Ago", Focus="TypeScript Intermediário",
+                        Days=new(){
+                            new(){ Day="Seg", Task="Enums + unknown",
+                                Description="Estudar enums, asserções de tipo (Type Assertions) e o uso correcto do operador unknown em substituição ao perigoso any." },
+                            new(){ Day="Ter", Task="Generics",
+                                Description="Entender e implementar o conceito de Genéricos (Generics) para criar funções e classes altamente reutilizáveis e tipadas." },
+                            new(){ Day="Qua", Task="Type Narrowing + Guards",
+                                Description="Praticar técnicas de estreitamento de tipos (Type Narrowing) e criar guardas de tipo personalizados (Type Guards)." },
+                            new(){ Day="Qui", Task="Modificadores de Acesso",
+                                Description="Explorar modificadores de acesso em classes (public, private, readonly) do TypeScript e a sua compilação para o JS tradicional." },
+                            new(){ Day="Sex", Task="Projecto: Inventário CLI",
+                                Description="Desenvolver um 'Gerenciador de Inventário CLI' em Node.js com TypeScript, explorando o uso intensivo de Generics nas coleções." },
+                            new(){ Day="Sáb", Task="ts-node + Push",
+                                Description="Configurar scripts de execução com ts-node no package.json, estruturar o repositório e actualizar o GitHub." }
+                        }},
+                    new Week { Number=13, Dates="17–23 Ago", Focus="React + TS (Hooks)",
+                        Days=new(){
+                            new(){ Day="Seg", Task="React + Vite Setup",
+                                Description="Criar uma aplicação React com TypeScript usando o Vite, entendendo o funcionamento do JSX e da renderização de componentes." },
+                            new(){ Day="Ter", Task="useState tipado",
+                                Description="Gerir estados locais usando o hook useState, tipando correctamente os estados de arrays e objectos complexos." },
+                            new(){ Day="Qua", Task="useEffect",
+                                Description="Controlar o ciclo de vida e efeitos colaterais de componentes usando o hook useEffect (chamadas de API, cronómetros)." },
+                            new(){ Day="Qui", Task="Props tipadas",
+                                Description="Aprender a passar e tipar propriedades (Props) entre componentes pais e filhos, incluindo propriedades opcionais e callbacks." },
+                            new(){ Day="Sex", Task="Projecto: To-Do List",
+                                Description="Construir o projecto 'To-Do List Avançado', com persistência no LocalStorage, filtros de tarefas e contadores dinâmicos." },
+                            new(){ Day="Sáb", Task="CSS + Push",
+                                Description="Limpar ficheiros padrão do Vite, estilizar o To-Do minimamente com CSS e guardar o progresso no GitHub." }
+                        }},
+                    new Week { Number=14, Dates="24–30 Ago", Focus="React Router + Context",
+                        Days=new(){
+                            new(){ Day="Seg", Task="React Router",
+                                Description="Instalar e configurar o React Router para criar aplicações de página única (SPA) com múltiplas rotas navegáveis." },
+                            new(){ Day="Ter", Task="Rotas Dinâmicas + useParams",
+                                Description="Manipular rotas dinâmicas utilizando parâmetros na URL (ex: /produto/:id) e capturar esses dados com o hook useParams." },
+                            new(){ Day="Qua", Task="Context API",
+                                Description="Estudar a Context API do React para resolver o problema de partilha global de estados sem sofrer com prop drilling." },
+                            new(){ Day="Qui", Task="Context + TS + Custom Hook",
+                                Description="Unir Context API com TypeScript para tipar o valor do contexto e criar um Custom Hook facilitador de acesso." },
+                            new(){ Day="Sex", Task="Projecto: E-commerce Front",
+                                Description="Criar a estrutura front-end de um 'E-commerce', com rotas de catálogo e carrinho de compras integrado via Contexto global." },
+                            new(){ Day="Sáb", Task="Testes + Push",
+                                Description="Testar a navegação interna e a persistência do carrinho ao mudar de tela, realizando o Push no Git." }
+                        }},
+                    new Week { Number=15, Dates="31 Ago–06 Set", Focus="React Hook Form + Zod + TanStack Query",
+                        Days=new(){
+                            new(){ Day="Seg", Task="React Hook Form",
+                                Description="Conhecer o React Hook Form para gerir formulários performáticos que evitam renderizações desnecessárias na tela." },
+                            new(){ Day="Ter", Task="Zod Validation",
+                                Description="Integrar a biblioteca Zod para criar esquemas de validação de dados rígidos e inferir tipos directamente para o formulário." },
+                            new(){ Day="Qua", Task="TanStack Query Setup",
+                                Description="Instalar o TanStack Query (React Query) para gerir o estado de dados vindos do servidor de forma cacheada e inteligente." },
+                            new(){ Day="Qui", Task="Paginação + Loading States",
+                                Description="Implementar paginação, estados de carregamento (isLoading) e tratamento de erros visuais utilizando os hooks do TanStack Query." },
+                            new(){ Day="Sex", Task="Projecto: Painel de Cadastro",
+                                Description="Desenvolver um 'Painel de Cadastro' de clientes complexo, validando dados em tempo real e simulando o envio para uma API." },
+                            new(){ Day="Sáb", Task="DevTools + Push",
+                                Description="Configurar o DevTools do React Query para inspecionar os estados do cache de dados e efectuar o Push do código." }
+                        }},
+                    new Week { Number=16, Dates="07–13 Set", Focus="Projecto React Médio (Kanban)",
+                        Days=new(){
+                            new(){ Day="Seg", Task="Arquitectura do Kanban",
+                                Description="Desenhar a arquitectura do 'Kanban (Trello Clone)', definindo os estados globais de colunas (A fazer, Em progresso, Concluído)." },
+                            new(){ Day="Ter", Task="Colunas + Cartões",
+                                Description="Implementar a renderização visual das colunas e a criação dinâmica de novos cartões de tarefas com prazos e tags." },
+                            new(){ Day="Qua", Task="Drag entre Colunas",
+                                Description="Adicionar a lógica de movimentação de cartões entre as colunas actualizando o estado interno do React." },
+                            new(){ Day="Qui", Task="Zod + LocalStorage",
+                                Description="Integrar validações com Zod ao editar ou criar tarefas e guardar o estado completo do Kanban no LocalStorage." },
+                            new(){ Day="Sex", Task="Refatoração de Componentes",
+                                Description="Refatorar os componentes do Kanban isolando responsabilidades pequenas e aplicando boas práticas de tipagem estrutural." },
+                            new(){ Day="Sáb", Task="Deploy Vercel/Netlify",
+                                Description="Publicar o Front-end do Kanban em uma plataforma gratuita (como Vercel ou Netlify) e actualizar o link no GitHub." }
+                        }},
+                    new Week { Number=17, Dates="14–20 Set", Focus="Next.js 15 App Router",
+                        Days=new(){
+                            new(){ Day="Seg", Task="Setup Next.js 15",
+                                Description="Inicializar um projecto Next.js 15, entendendo o conceito de arquitectura do App Router e a estrutura base da pasta app/." },
+                            new(){ Day="Ter", Task="Server vs Client Components",
+                                Description="Diferenciar na prática os Componentes de Servidor (Server Components — padrão) dos Componentes de Cliente (Client Components)." },
+                            new(){ Day="Qua", Task="Rotas + Layouts",
+                                Description="Criar rotas estáticas, rotas dinâmicas e layouts partilhados reutilizáveis usando as convenções de pastas do Next.js." },
+                            new(){ Day="Qui", Task="Image + Link + Fonts",
+                                Description="Explorar as optimizações nativas de componentes do Next.js, como os componentes de Imagem (Image), Links e Fontes customizadas." },
+                            new(){ Day="Sex", Task="Projecto: Portal de Notícias",
+                                Description="Desenvolver o projecto 'Portal de Notícias', buscando dados directamente do lado do servidor para renderização rápida e SEO optimizado." },
+                            new(){ Day="Sáb", Task=".env + Push",
+                                Description="Configurar as variáveis de ambiente locais do Next.js e guardar a estrutura inicial da aplicação no GitHub." }
+                        }},
+                    new Week { Number=18, Dates="21–27 Set", Focus="Server Actions + Streaming",
+                        Days=new(){
+                            new(){ Day="Seg", Task="Server Actions",
+                                Description="Estudar os Server Actions do Next.js 15 para enviar formulários e interagir com o back-end sem criar rotas de API explícitas." },
+                            new(){ Day="Ter", Task="useActionState",
+                                Description="Implementar o tratamento de estados de transição em Server Actions utilizando o hook nativo useActionState (ou useFormStatus)." },
+                            new(){ Day="Qua", Task="Streaming + loading.tsx",
+                                Description="Aplicar o conceito de Streaming criando ficheiros loading.tsx para exibir esqueletos de carregamento parciais na tela automaticamente." },
+                            new(){ Day="Qui", Task="revalidatePath + revalidateTag",
+                                Description="Entender e configurar as estratégias de revalidação de dados em cache (revalidatePath e revalidateTag) pós-acções do utilizador." },
+                            new(){ Day="Sex", Task="Projecto: Feed de Avaliações",
+                                Description="Criar um 'Feed de Avaliações', onde o utilizador posta comentários via Server Actions e a lista actualiza instantaneamente em tela." },
+                            new(){ Day="Sáb", Task="Teste com conexão lenta",
+                                Description="Testar a experiência do utilizador simulando conexões lentas para validar o comportamento do Streaming, subindo o código em seguida." }
+                        }},
+                    new Week { Number=19, Dates="28 Set–04 Out", Focus="Integração Next.js + Back-end",
+                        Days=new(){
+                            new(){ Day="Seg", Task="Planejar comunicação",
+                                Description="Planear a comunicação de rede entre a aplicação front-end Next.js e as APIs desenvolvidas anteriormente em .NET." },
+                            new(){ Day="Ter", Task="Configurar CORS",
+                                Description="Configurar políticas de CORS no back-end para permitir que o domínio do Next.js consuma os dados de forma segura." },
+                            new(){ Day="Qua", Task="Fetch em Server Components",
+                                Description="Fazer requisições HTTP dentro de Server Components para listar os dados do back-end durante a renderização da página." },
+                            new(){ Day="Qui", Task="Mutações de Dados",
+                                Description="Implementar mutações de dados (Criação/Edição) disparadas pelo Next.js que reflictam directamente no back-end." },
+                            new(){ Day="Sex", Task="Tipagem Partilhada",
+                                Description="Resolver problemas de tipagem partilhando contratos ou recriando interfaces TypeScript equivalentes às entidades do Back-end." },
+                            new(){ Day="Sáb", Task="Integração local + Push",
+                                Description="Garantir que ambos os servidores (Front e Back) correm integrados localmente sem erros e realizar o push nos respectivos repositórios." }
+                        }},
+                    new Week { Number=20, Dates="05–11 Out", Focus="Autenticação Completa",
+                        Days=new(){
+                            new(){ Day="Seg", Task="Cookies vs JWT em SSR",
+                                Description="Compreender os conceitos de autenticação baseada em Cookies de Sessão versus Tokens JWT no ecossistema SSR do Next.js." },
+                            new(){ Day="Ter", Task="Tela de Login",
+                                Description="Construir a tela de Login capturando credenciais e enviando-as para o endpoint de autenticação do back-end." },
+                            new(){ Day="Qua", Task="Cookie HttpOnly",
+                                Description="Armazenar o token retornado em um Cookie seguro (HttpOnly) utilizando os recursos nativos do pacote next/headers." },
+                            new(){ Day="Qui", Task="Next.js Middleware",
+                                Description="Implementar Next.js Middleware para interceptar rotas privadas, redirecionando utilizadores não autenticados para a tela de login." },
+                            new(){ Day="Sex", Task="Dashboard Restrita",
+                                Description="Desenvolver uma Dashboard restrita que consome e exibe dados do utilizador logado extraídos a partir do Cookie seguro." },
+                            new(){ Day="Sáb", Task="Testes de Segurança",
+                                Description="Testar exaustivamente cenários de tokens expirados e fluxos de logout, garantindo a segurança do app antes do push." }
+                        }},
+                    new Week { Number=21, Dates="12–18 Out", Focus="Projecto Final Fase 2 – semana 1/4",
+                        Days=new(){
+                            new(){ Day="Seg", Task="Estrutura App Router",
+                                Description="Esboçar o fluxo de telas do utilizador e criar a estrutura de pastas do Next.js 15 focando no padrão App Router (app/dashboard/*)." },
+                            new(){ Day="Ter", Task="Layouts Complexos",
+                                Description="Criar os layouts partilhados complexos da aplicação (como barras de navegação laterais responsivas e cabeçalhos de perfil)." },
+                            new(){ Day="Qua", Task="Componentes UI Reutilizáveis",
+                                Description="Desenvolver os componentes visuais estáticos reutilizáveis de UI, como inputs tipados, botões com estados de loading e modais." },
+                            new(){ Day="Qui", Task="Tailwind + Responsividade",
+                                Description="Configurar o ecossistema de temas globais (Tailwind ou CSS Modules) garantindo total responsividade para dispositivos móveis." },
+                            new(){ Day="Sex", Task="React Hook Form + Zod",
+                                Description="Implementar o gerenciamento de estados locais de formulários utilizando React Hook Form integrado com validações do Zod." },
+                            new(){ Day="Sáb", Task="Navegação + Push",
+                                Description="Testar a navegação estrutural das páginas vazias e layouts usando o roteamento nativo do Next.js, guardando o progresso no Git." }
+                        }},
+                    new Week { Number=22, Dates="19–25 Out", Focus="Projecto Final Fase 2 – semana 2/4",
+                        Days=new(){
+                            new(){ Day="Seg", Task="TanStack Query + HTTP",
+                                Description="Configurar os clientes HTTP e o TanStack Query para gerir as chamadas de dados assíncronas vindas da API back-end." },
+                            new(){ Day="Ter", Task="Listagem via Server Components",
+                                Description="Implementar a listagem de lançamentos financeiros consumindo os dados directamente de Server Components para optimizar o SEO." },
+                            new(){ Day="Qua", Task="Server Actions de Cadastro",
+                                Description="Desenvolver formulários dinâmicos de cadastro de receitas e despesas disparados através de Server Actions nativos do Next.js." },
+                            new(){ Day="Qui", Task="Revalidação de Cache",
+                                Description="Configurar a invalidação e revalidação inteligente do cache de rotas utilizando as tags específicas do Next.js pós-mutação." },
+                            new(){ Day="Sex", Task="Skeletons + Suspense",
+                                Description="Adicionar telas de feedback visual e skeletons usando recursos de Streaming e Suspense." },
+                            new(){ Day="Sáb", Task="Monitorar Network + Commit",
+                                Description="Monitorar a aba Network do navegador para verificar o tráfego de dados e o tempo de resposta, commitando as rotas conectadas." }
+                        }},
+                    new Week { Number=23, Dates="26 Out–01 Nov", Focus="Projecto Final Fase 2 – semana 3/4",
+                        Days=new(){
+                            new(){ Day="Seg", Task="Recharts Setup",
+                                Description="Instalar e configurar a biblioteca de gráficos vectoriais (Recharts) garantindo que renderize de forma limpa no Next.js." },
+                            new(){ Day="Ter", Task="Dados → Gráficos",
+                                Description="Tratar e mapear os arrays de dados financeiros vindos da API para o formato esperado pelos gráficos de barras e rosca." },
+                            new(){ Day="Qua", Task="Filtros Temporais",
+                                Description="Criar os componentes de filtros avançados por período de tempo (mensal, anual) que actualizam os gráficos dinamicamente." },
+                            new(){ Day="Qui", Task="Exportação CSV",
+                                Description="Desenvolver recursos de exportação de dados que permitem ao utilizador transferir planilhas directamente da tela." },
+                            new(){ Day="Sex", Task="Optimização de Componentes",
+                                Description="Refatorar componentes de cliente pesados, aplicando técnicas de isolamento de estado para evitar re-renderizações desnecessárias." },
+                            new(){ Day="Sáb", Task="Testes Visuais + Push",
+                                Description="Validar o comportamento visual dos gráficos mudando filtros de datas rapidamente, limpar avisos do console e subir as alterações." }
+                        }},
+                    new Week { Number=24, Dates="02–08 Nov", Focus="Projecto Final Fase 2 – semana 4/4",
+                        Days=new(){
+                            new(){ Day="Seg", Task="Protecção de Rotas",
+                                Description="Implementar a protecção de rotas privadas no Next.js capturando cookies seguros (HttpOnly) através de ficheiros de Middleware." },
+                            new(){ Day="Ter", Task="error.tsx",
+                                Description="Tratar fluxos de erro críticos na tela (como queda do servidor back-end) criando ficheiros especializados de error.tsx." },
+                            new(){ Day="Qua", Task="next build",
+                                Description="Configurar e disparar o build de produção local (next build) para rastrear erros latentes de tipagem estática no TypeScript." },
+                            new(){ Day="Qui", Task="Deploy Vercel",
+                                Description="Publicar a aplicação front-end na plataforma da Vercel e injectar de forma segura as variáveis de ambiente de produção." },
+                            new(){ Day="Sex", Task="Guia Visual + GitHub",
+                                Description="Escrever o guia visual completo do projecto no GitHub com prints das telas, links de acesso online e instruções arquitecturais." },
+                            new(){ Day="Sáb", Task="Testes Mobile + Fase 2 ✅",
+                                Description="Fazer testes completos acedendo ao site publicado directamente pelo telemóvel, garantir estabilidade total e fechar as tarefas da Fase 2!" }
+                        }},
+                }
+            },
+            new Phase
+            {
+                Id = 3,
+                Label = "Fase 3",
+                Title = "Python + Teoria de Machine Learning",
+                Period = "09/11/2026 – 03/01/2027",
+                Hours = "18–22h/sem",
+                FinalProject = "MLP implementada em Python",
+                AccentColor = "#ff9f43",
+                Weeks = new List<Week>
+                {
+                    new Week { Number=25, Dates="09–15 Nov", Focus="Python: Sintaxe, Tipos, Estruturas",
+                        Days=new(){
+                            new(){ Day="Seg", Task="Setup Python + venv",
+                                Description="Instalar o Python 3.x, configurar o ambiente virtual (venv) e entender as regras de indentação obrigatória da linguagem." },
+                            new(){ Day="Ter", Task="Tipos + Strings",
+                                Description="Manipular tipos de dados primitivos, strings (e as suas funções nativas) e capturar entradas do utilizador via terminal." },
+                            new(){ Day="Qua", Task="Condicionais",
+                                Description="Dominar estruturas condicionais (if, elif, else) e operadores lógicos de curto-circuito do Python." },
+                            new(){ Day="Qui", Task="Loops for + while",
+                                Description="Praticar laços de repetição usando for (com a função range()) e while para fluxos de iteração controlados." },
+                            new(){ Day="Sex", Task="Listas + Tuplas",
+                                Description="Explorar as coleções nativas fundamentais do Python, focando no uso prático e manipulação de Listas (lists) e Tuplas (tuples)." },
+                            new(){ Day="Sáb", Task="Script CLI + Push",
+                                Description="Criar um script CLI simples de automação de notas, versionar no Git e realizar o upload para o GitHub." }
+                        }},
+                    new Week { Number=26, Dates="16–22 Nov", Focus="Funções Avançadas + Comprehensions",
+                        Days=new(){
+                            new(){ Day="Seg", Task="Funções + Escopos",
+                                Description="Declarar funções, gerir escopos de variáveis locais/globais e utilizar argumentos nomeados ou padrões." },
+                            new(){ Day="Ter", Task="*args + **kwargs",
+                                Description="Dominar o uso avançado de empacotamento e desempacotamento de parâmetros arbitrários usando *args e **kwargs." },
+                            new(){ Day="Qua", Task="List + Dict Comprehensions",
+                                Description="Simplificar a criação de coleções aplicando estruturas concisas de List Comprehensions e Dict Comprehensions." },
+                            new(){ Day="Qui", Task="Lambda + map/filter",
+                                Description="Explorar o uso de expressões Lambda e funções integradas de alta ordem como map(), filter() e reduce()." },
+                            new(){ Day="Sex", Task="Script funcional de dados",
+                                Description="Escrever um script utilitário para ler, processar de forma funcional e filtrar listas densas de dicionários de dados." },
+                            new(){ Day="Sáb", Task="Type Hints + Push",
+                                Description="Validar a tipagem opcional nas assinaturas de funções (Type Hinting) e fazer o Push do script higienizado." }
+                        }},
+                    new Week { Number=27, Dates="23–29 Nov", Focus="Matrizes e Vetores Multidimensionais com NumPy",
+                        Days=new(){
+                            new(){ Day="Seg", Task="Arrays Multidimensionais (ndarray)",
+                                Description="Criar e manipular arrays NumPy de múltiplas dimensões (2D, 3D), compreendendo shape, reshape e a diferença entre vector e matriz." },
+                            new(){ Day="Ter", Task="Indexação e Slicing Avançado",
+                                Description="Dominar indexação booleana, fancy indexing e slicing multidimensional para extrair e filtrar sub-regiões de matrizes." },
+                            new(){ Day="Qua", Task="Broadcasting",
+                                Description="Compreender o mecanismo de Broadcasting do NumPy, que permite operações aritméticas entre arrays de formas diferentes sem loops explícitos." },
+                            new(){ Day="Qui", Task="Operações Vectorizadas vs Loops",
+                                Description="Comparar performance entre operações vectorizadas do NumPy e loops Python puros, entendendo porque a vectorização é essencial em IA." },
+                            new(){ Day="Sex", Task="Manipulação de Matrizes para Dados de Imagem",
+                                Description="Praticar a representação de imagens como matrizes de pixels, normalizando e transformando valores — preparação directa para o MNIST." },
+                            new(){ Day="Sáb", Task="Script de Manipulação Matricial + Push",
+                                Description="Consolidar os exercícios de manipulação matricial num script documentado e fazer Push para o GitHub." }
+                        }},
+                    new Week { Number=28, Dates="30 Nov–06 Dez", Focus="Pandas + NumPy: Carregamento e Normalização do MNIST",
+                        Days=new(){
+                            new(){ Day="Seg", Task="Setup Pandas + NumPy",
+                                Description="Entender o ecossistema de análise de dados instalando as bibliotecas Pandas e NumPy no ambiente virtual." },
+                            new(){ Day="Ter", Task="Arrays NumPy",
+                                Description="Dominar as operações fundamentais com arrays NumPy: criação, indexação, slicing e operações vectorizadas eficientes." },
+                            new(){ Day="Qua", Task="Series + DataFrames",
+                                Description="Dominar as estruturas de dados fundamentais do Pandas trabalhando directamente com Series e DataFrames para manipulação tabular." },
+                            new(){ Day="Qui", Task="Carregar Dataset MNIST (CSV local)",
+                                Description="Ler o dataset MNIST a partir de ficheiros CSV locais com Pandas, sem depender de chamadas de rede ou APIs externas." },
+                            new(){ Day="Sex", Task="Normalização e Pré-processamento do MNIST",
+                                Description="Aplicar normalização dos valores de pixel para o intervalo [0,1] e converter os DataFrames em arrays NumPy prontos para o treino da rede." },
+                            new(){ Day="Sáb", Task="Exportar + Push",
+                                Description="Exportar o dataset tratado para um novo ficheiro estruturado e realizar o upload no repositório." }
+                        }},
+                    new Week { Number=29, Dates="07–13 Dez", Focus="Matemática para IA (Vetores, Matrizes)",
+                        Days=new(){
+                            new(){ Day="Seg", Task="Vetores e Dados",
+                                Description="Compreender o papel da álgebra linear na inteligência artificial e aprender a representar dados numéricos em formato de vetores." },
+                            new(){ Day="Ter", Task="Operações com Vetores",
+                                Description="Praticar operações fundamentais com vetores: soma, subtração e a operação geométrica de produto escalar (dot product)." },
+                            new(){ Day="Qua", Task="Matrizes + Transposição",
+                                Description="Estudar Matrizes, entendendo as suas dimensões e transposição de linhas por colunas para manipulação estruturada de dados." },
+                            new(){ Day="Qui", Task="Multiplicação de Matrizes",
+                                Description="Dominar a multiplicação de matrizes, prestando atenção nas regras de alinhamento de dimensões necessárias para a operação." },
+                            new(){ Day="Sex", Task="NumPy na prática",
+                                Description="Utilizar a biblioteca NumPy do Python para codificar todas as operações com vetores e matrizes estudadas na semana." },
+                            new(){ Day="Sáb", Task="Notebook NumPy + Push",
+                                Description="Criar um pequeno script Python documentando as operações matemáticas puras via NumPy e subir no GitHub." }
+                        }},
+                    new Week { Number=30, Dates="14–20 Dez", Focus="Gradiente + Optimização",
+                        Days=new(){
+                            new(){ Day="Seg", Task="Derivadas",
+                                Description="Entender o conceito de derivadas na matemática e como elas medem a taxa de variação de uma função num ponto específico." },
+                            new(){ Day="Ter", Task="Gradiente Descendente",
+                                Description="Estudar o algoritmo do Gradiente Descendente, compreendendo como ele guia os ajustes de pesos para minimizar os erros de um modelo." },
+                            new(){ Day="Qua", Task="Learning Rate",
+                                Description="Analisar o papel da Taxa de Aprendizado (Learning Rate) e os problemas de a configurar demasiado alta ou demasiado baixa." },
+                            new(){ Day="Qui", Task="Funções de Custo (MSE)",
+                                Description="Compreender o funcionamento das Funções de Custo (como o Erro Quadrático Médio — MSE) para mensurar o desempenho da rede." },
+                            new(){ Day="Sex", Task="Gradiente em Python",
+                                Description="Implementar uma optimização matemática simples de gradiente descendente puro em Python para encontrar o ponto mínimo de uma função." },
+                            new(){ Day="Sáb", Task="Resumo Visual + Push",
+                                Description="Escrever um resumo markdown detalhando a intuição matemática por trás do gradiente descendente e guardar no repositório." }
+                        }},
+                    new Week { Number=31, Dates="21–27 Dez", Focus="Perceptron em Python",
+                        Days=new(){
+                            new(){ Day="Seg", Task="História do Perceptron",
+                                Description="Estudar a história e arquitectura do Perceptron de camada única, a unidade fundamental inspirada no neurônio biológico." },
+                            new(){ Day="Ter", Task="Pesos + Bias em Python",
+                                Description="Compreender o papel dos Pesos (Weights) e do Viés (Bias) na tomada de decisão do neurônio e implementar as operações em Python puro." },
+                            new(){ Day="Qua", Task="Funções de Activação",
+                                Description="Conhecer as Funções de Activação lineares e não-lineares, implementando a função Step e Sigmoide em Python com NumPy." },
+                            new(){ Day="Qui", Task="Regra de Actualização",
+                                Description="Implementar a regra de actualização de pesos do Perceptron em Python com base no erro entre a previsão e o valor real esperado." },
+                            new(){ Day="Sex", Task="Código do Perceptron Python",
+                                Description="Codificar a classe Perceptron do zero em Python usando apenas NumPy, preparando a base conceptual para a implementação em C# na Fase 4." },
+                            new(){ Day="Sáb", Task="Testar AND + OR + Push",
+                                Description="Testar o Perceptron Python nas portas lógicas AND e OR, documentar os resultados e fazer Push para o GitHub." }
+                        }},
+                    new Week { Number=32, Dates="28 Dez–03 Jan", Focus="MLP em Python + NumPy",
+                        Days=new(){
+                            new(){ Day="Seg", Task="MLP + Problemas Não-Lineares",
+                                Description="Evoluir o Perceptron para uma Rede Neural Multicamada (MLP) em Python para resolver problemas não-lineares como o XOR." },
+                            new(){ Day="Ter", Task="Forward Propagation Python",
+                                Description="Implementar o fluxo de Forward Propagation em Python usando operações matriciais do NumPy para maior eficiência." },
+                            new(){ Day="Qua", Task="Sigmoide + ReLU em Python",
+                                Description="Codificar as funções de activação Sigmoide e ReLU em Python e as suas derivadas necessárias para o Backpropagation." },
+                            new(){ Day="Qui", Task="Backpropagation em Python",
+                                Description="Implementar o Backpropagation em Python aplicando a regra da cadeia para calcular os gradientes de cada camada e actualizar os pesos." },
+                            new(){ Day="Sex", Task="Código MLP Python completo",
+                                Description="Finalizar a classe MLP em Python com métodos de treino (fit) e previsão (predict), testando no problema XOR." },
+                            new(){ Day="Sáb", Task="Documentar para C# + Push",
+                                Description="Documentar a arquitectura Python da MLP de forma clara para servir de referência directa durante a implementação em C# na Fase 4." }
+                        }},
+                }
+            },
+            new Phase
+            {
+                Id = 4,
+                Label = "Fase 4",
+                Title = "Rede Neural + MNIST + Blazor (PAP)",
+                Period = "04/01/2027 – 28/02/2027",
+                Hours = "22–26h/sem",
+                FinalProject = "PAP: Reconhecimento de Dígitos MNIST",
+                AccentColor = "#ee5a24",
+                Weeks = new List<Week>
+                {
+                    new Week { Number=33, Dates="04–10 Jan", Focus="MNIST + Perceptron do Zero em C#",
+                        Days=new(){
+                            new(){ Day="Seg", Task="Dataset MNIST",
+                                Description="Transferir e entender o dataset MNIST, uma coleção pública de imagens de dígitos manuscritos usada como benchmark clássico em IA." },
+                            new(){ Day="Ter", Task="Pré-processamento MNIST",
+                                Description="Aplicar o pré-processamento nas imagens: converter matrizes 2D de pixels em vetores lineares e normalizar os valores para o intervalo [0,1]." },
+                            new(){ Day="Qua", Task="Perceptron do Zero em C#",
+                                Description="Traduzir a classe Perceptron implementada em Python para C#, adaptando as operações de álgebra linear sem bibliotecas de ML prontas." },
+                            new(){ Day="Qui", Task="Pesos + Bias em C#",
+                                Description="Implementar a inicialização aleatória de pesos e bias em C# e verificar a equivalência matemática com a versão Python já testada." },
+                            new(){ Day="Sex", Task="Testar Perceptron C# com MNIST",
+                                Description="Testar o Perceptron C# com amostras do MNIST para validar a correcção matemática antes de avançar para a MLP." },
+                            new(){ Day="Sáb", Task="Commit + Documentação",
+                                Description="Commitar o código C# do Perceptron com comentários detalhados explicando cada operação matemática realizada." }
+                        }},
+                    new Week { Number=34, Dates="11–17 Jan", Focus="MLP do Zero em C#",
+                        Days=new(){
+                            new(){ Day="Seg", Task="MLP: Estrutura em C#",
+                                Description="Definir a arquitectura da classe MLP em C#, planeando as camadas, pesos e bias usando arrays e matrizes nativas da linguagem." },
+                            new(){ Day="Ter", Task="Forward Propagation C#",
+                                Description="Implementar o fluxo de Forward Propagation em C# aplicando multiplicações matriciais para propagar os dados pelas camadas." },
+                            new(){ Day="Qua", Task="Sigmoide + ReLU C#",
+                                Description="Codificar as funções de activação Sigmoide e ReLU em C# e as suas derivadas necessárias para o algoritmo de Backpropagation." },
+                            new(){ Day="Qui", Task="Backpropagation C#",
+                                Description="Implementar o Backpropagation em C# calculando os gradientes de cada camada e actualizando os pesos com descida do gradiente." },
+                            new(){ Day="Sex", Task="Treinar MLP C# no MNIST",
+                                Description="Alimentar a MLP C# com os dados do MNIST e correr os primeiros ciclos de treino, monitorizando a redução do erro ao longo das épocas." },
+                            new(){ Day="Sáb", Task="Acurácia + Push",
+                                Description="Calcular a acurácia da MLP nos dados de teste e commitar o código com relatório de desempenho no README." }
+                        }},
+                    new Week { Number=35, Dates="18–24 Jan", Focus="ML.NET Setup + Pipeline MNIST",
+                        Days=new(){
+                            new(){ Day="Seg", Task="Ecossistema ML.NET",
+                                Description="Entender o ecossistema ML.NET, a ferramenta oficial da Microsoft para integrar Machine Learning nativamente no C#." },
+                            new(){ Day="Ter", Task="Microsoft.ML NuGet",
+                                Description="Configurar o ambiente instalando os pacotes NuGet do Microsoft.ML e estruturar o projecto de consola inicial." },
+                            new(){ Day="Qua", Task="MLContext + IDataView",
+                                Description="Compreender as classes fundamentais MLContext, IDataView e pipelines de transformação de dados do framework ML.NET." },
+                            new(){ Day="Qui", Task="Pipeline MNIST com ML.NET",
+                                Description="Construir o pipeline de carregamento e transformação do dataset MNIST utilizando os métodos nativos do ML.NET." },
+                            new(){ Day="Sex", Task="Comparar MLP do Zero vs ML.NET",
+                                Description="Comparar o modelo ML.NET treinado no MNIST com a MLP implementada do zero, avaliando diferenças de acurácia e velocidade." },
+                            new(){ Day="Sáb", Task="Guardar modelo .zip + Push",
+                                Description="Guardar o modelo ML.NET treinado em formato .zip e commitar o pipeline completo no repositório." }
+                        }},
+                    new Week { Number=36, Dates="25–31 Jan", Focus="ML.NET Persistência + PredictionEngine",
+                        Days=new(){
+                            new(){ Day="Seg", Task="Carregar modelo .zip",
+                                Description="Criar um projecto C# separado que carrega o modelo .zip guardado e realiza previsões isoladas de dígitos individuais." },
+                            new(){ Day="Ter", Task="PredictionEngine",
+                                Description="Implementar previsões pontuais usando a classe PredictionEngine do ML.NET para classificar imagens em tempo real." },
+                            new(){ Day="Qua", Task="Métricas de Avaliação",
+                                Description="Avaliar a qualidade do modelo com métricas de classificação multiclasse: acurácia, matriz de confusão e F1-score." },
+                            new(){ Day="Qui", Task="PredictionEnginePool",
+                                Description="Configurar a PredictionEnginePool para suportar previsões concorrentes de forma segura quando a aplicação receber múltiplas requisições." },
+                            new(){ Day="Sex", Task="Refatorar para Serviço",
+                                Description="Isolar a lógica de carregamento e previsão do modelo num serviço C# limpo configurado via injecção de dependência." },
+                            new(){ Day="Sáb", Task="Testes de Previsão + Push",
+                                Description="Escrever testes unitários para o serviço de previsão e commitar o código final da camada de inteligência artificial." }
+                        }},
+                    new Week { Number=37, Dates="01–07 Fev", Focus="Blazor Server Setup + Interface PAP",
+                        Days=new(){
+                            new(){ Day="Seg", Task="Por que Blazor no Linux?",
+                                Description="Entender as vantagens do Blazor Server para desenvolvimento no Arch Linux, evitando as limitações do WinForms e WPF em sistemas não-Windows." },
+                            new(){ Day="Ter", Task="Setup Blazor Server",
+                                Description="Criar o projecto Blazor Server no .NET, entendendo a estrutura de componentes .razor, o ciclo de vida e o SignalR embutido." },
+                            new(){ Day="Qua", Task="Componentes + Binding",
+                                Description="Criar os primeiros componentes Blazor com two-way data binding, passagem de parâmetros e eventos entre componentes pai/filho." },
+                            new(){ Day="Qui", Task="Canvas de Desenho via JSInterop",
+                                Description="Implementar o componente de canvas onde o utilizador pode desenhar um dígito com o rato, usando JSInterop para comunicar com JavaScript." },
+                            new(){ Day="Sex", Task="UI Completa da PAP",
+                                Description="Construir a interface completa da PAP: área de desenho, botão de reconhecimento e painel de exibição da previsão com percentuais de confiança." },
+                            new(){ Day="Sáb", Task="Estilização + Push",
+                                Description="Estilizar a interface com CSS ou Bootstrap no Blazor, garantindo uma apresentação limpa para a PAP, e fazer Push." }
+                        }},
+                    new Week { Number=38, Dates="08–14 Fev", Focus="Integração ML.NET + Blazor",
+                        Days=new(){
+                            new(){ Day="Seg", Task="Injectar Serviço ML no Blazor",
+                                Description="Registar o serviço de IA criado com ML.NET no sistema de injecção de dependência do Blazor para uso nos componentes." },
+                            new(){ Day="Ter", Task="Capturar Pixels do Canvas",
+                                Description="Implementar a lógica JavaScript via JSInterop para capturar os pixels do canvas desenhado e enviar para o serviço C# de previsão." },
+                            new(){ Day="Qua", Task="Pré-processar no Blazor",
+                                Description="Aplicar o pré-processamento da imagem capturada (normalização e reshape) directamente no componente Blazor antes de chamar o modelo." },
+                            new(){ Day="Qui", Task="Exibir Resultado em Tempo Real",
+                                Description="Exibir o dígito reconhecido pela rede neural na tela com a confiança percentual de cada classe (0-9) em tempo real." },
+                            new(){ Day="Sex", Task="Fluxo Completo Funcionando",
+                                Description="Testar o fluxo completo: desenhar → capturar → processar → prever → exibir resultado, garantindo latência aceitável na interface." },
+                            new(){ Day="Sáb", Task="Testes de Usabilidade + Push",
+                                Description="Testar a experiência de uso da interface com diferentes traços e estilos de escrita, ajustando e fazendo o Push final." }
+                        }},
+                    new Week { Number=39, Dates="15–21 Fev", Focus="Polimento PAP + Relatório Técnico",
+                        Days=new(){
+                            new(){ Day="Seg", Task="Painel de Métricas",
+                                Description="Adicionar um painel de métricas na interface Blazor mostrando a acurácia do modelo, número de épocas de treino e exemplos de acertos." },
+                            new(){ Day="Ter", Task="Histórico de Reconhecimentos",
+                                Description="Implementar um histórico visual das últimas previsões realizadas para enriquecer a demonstração da PAP." },
+                            new(){ Day="Qua", Task="Tratamento de Erros",
+                                Description="Adicionar tratamento de erros visual no Blazor para casos de previsão inconclusiva ou falhas de processamento do modelo." },
+                            new(){ Day="Qui", Task="Relatório Técnico PAP",
+                                Description="Escrever o relatório técnico da PAP documentando a arquitectura da rede neural, processo de treino, dataset MNIST e resultados obtidos." },
+                            new(){ Day="Sex", Task="Preparar Apresentação",
+                                Description="Preparar a apresentação da PAP com diagramas do fluxo de dados, exemplos visuais de reconhecimento e análise dos resultados finais." },
+                            new(){ Day="Sáb", Task="Push Final PAP 🎓",
+                                Description="Fazer o Push final do repositório da PAP com toda a documentação, código limpo e instruções de execução bem organizadas." }
+                        }},
+                    new Week { Number=40, Dates="22–28 Fev", Focus="Buffer PAP + Entrega Final",
+                        Days=new(){
+                            new(){ Day="Seg", Task="Revisão Geral do Código",
+                                Description="Semana reservada para revisão final de todo o código da PAP, garantindo que está limpo, comentado e sem bugs conhecidos." },
+                            new(){ Day="Ter", Task="Testes em Diferentes Ambientes",
+                                Description="Testar a aplicação Blazor em diferentes navegadores e resoluções, verificando a consistência do canvas de desenho." },
+                            new(){ Day="Qua", Task="Ajustes de Performance",
+                                Description="Optimizar o tempo de resposta da previsão e reduzir o uso de memória do modelo carregado na aplicação Blazor." },
+                            new(){ Day="Qui", Task="Documentação Final",
+                                Description="Finalizar toda a documentação da PAP: README, relatório técnico, diagrama da arquitectura e instruções de instalação." },
+                            new(){ Day="Sex", Task="Simulação de Apresentação",
+                                Description="Realizar uma simulação completa da apresentação da PAP, cronometrando o tempo e praticando a explicação técnica das decisões tomadas." },
+                            new(){ Day="Sáb", Task="Entrega PAP ✅",
+                                Description="Entrega definitiva da PAP com toda a documentação final, código commitado, repositório público organizado e link acessível no GitHub." }
+                        }},
+                }
+            },
+            new Phase
+            {
+                Id = 5,
+                Label = "Fase 5",
+                Title = "PHP + Laravel + EF Core + Cloud + Mensageria + Docker + Emprego",
+                Period = "01/03/2027 – 07/10/2027",
+                Hours = "20–25h/sem",
+                FinalProject = "Portfólio Completo + Primeiro Emprego",
+                AccentColor = "#ff6b9d",
+                Weeks = new List<Week>
+                {
+                    new Week { Number=41, Dates="01–07 Mar", Focus="PHP Puro + MySQL: PDO, CRUD, Relações",
+                        Days=new(){
+                            new(){ Day="Seg", Task="PDO + Conexão MySQL",
+                                Description="Configurar a conexão segura ao MySQL usando PDO em PHP puro, entendendo prepared statements para prevenção de SQL Injection." },
+                            new(){ Day="Ter", Task="CRUD com PDO",
+                                Description="Implementar as quatro operações básicas (Criar, Ler, Actualizar, Apagar) em PHP puro com PDO, sem qualquer framework." },
+                            new(){ Day="Qua", Task="Relações 1:N em SQL + PHP",
+                                Description="Modelar relações de 1 para Muitos directamente em SQL e manipulá-las via JOIN nas queries PHP, sem ORM." },
+                            new(){ Day="Qui", Task="Relações N:N + Tabela Pivô",
+                                Description="Criar tabelas pivô para relações de Muitos para Muitos e escrever as queries complexas necessárias em PHP puro." },
+                            new(){ Day="Sex", Task="Projecto: API de Produtos em PHP Puro",
+                                Description="Construir uma mini API REST em PHP puro com PDO, retornando JSON para operações de listagem e cadastro de produtos com categorias." },
+                            new(){ Day="Sáb", Task="Git + Documentação SQL",
+                                Description="Versionar o projecto, documentar o schema SQL com um diagrama e fazer Push para o GitHub." }
+                        }},
+                    new Week { Number=42, Dates="08–14 Mar", Focus="EF Core + MySQL em C#",
+                        Days=new(){
+                            new(){ Day="Seg", Task="EF Core Setup + Pomelo",
+                                Description="Configurar o Entity Framework Core no projecto C# utilizando o provedor Pomelo para conexão nativa com MySQL — equivalente ao PDO da semana anterior." },
+                            new(){ Day="Ter", Task="Migrations + Code First",
+                                Description="Gerar a primeira Migration e aplicá-la para criar a estrutura do banco automaticamente, comparando com o SQL manual feito em PHP." },
+                            new(){ Day="Qua", Task="Relações 1:N + Fluent API",
+                                Description="Configurar relações 1:N com propriedades de navegação e usar a Fluent API para mapeamentos que as convenções não cobrem." },
+                            new(){ Day="Qui", Task="Relações N:N + Async EF",
+                                Description="Configurar relações N:N com tabela pivô customizada e optimizar as queries com os métodos assíncronos do EF Core." },
+                            new(){ Day="Sex", Task="CRUD completo com EF Core",
+                                Description="Replicar o projecto de Produtos da semana anterior usando EF Core em vez de PDO, comparando a produtividade entre os dois." },
+                            new(){ Day="Sáb", Task="Documentação comparativa + Push",
+                                Description="Escrever um README comparando as abordagens PHP/PDO vs C#/EF Core e fazer Push." }
+                        }},
+                    new Week { Number=43, Dates="15–21 Mar", Focus="Minimal APIs .NET + DI + DTOs + Swagger",
+                        Days=new(){
+                            new(){ Day="Seg", Task="Minimal APIs",
+                                Description="Construir endpoints rápidos e leves com Minimal APIs no .NET, sem controllers — arquitectura moderna para APIs pequenas e performáticas." },
+                            new(){ Day="Ter", Task="Injecção de Dependência",
+                                Description="Dominar o ciclo de vida da DI nativa do .NET diferenciando Transient, Scoped e Singleton, com especial atenção ao scope do DbContext." },
+                            new(){ Day="Qua", Task="DTOs + FluentValidation",
+                                Description="Implementar DTOs para desacoplar entidades de banco das respostas da API e aplicar validações robustas com FluentValidation." },
+                            new(){ Day="Qui", Task="Swagger + Testes de Integração",
+                                Description="Configurar o Swagger para documentação interativa e adicionar testes de integração com WebApplicationFactory para os endpoints." },
+                            new(){ Day="Sex", Task="Transformar CRUD em Minimal API",
+                                Description="Converter o CRUD de EF Core da semana anterior numa Web API completa baseada em Minimal APIs com DTOs e validação." },
+                            new(){ Day="Sáb", Task="Revisão arquitectural + Push",
+                                Description="Rever a arquitectura da API, testar os endpoints pelo Swagger e documentar as rotas no repositório." }
+                        }},
+                    new Week { Number=44, Dates="22–28 Mar", Focus="Laravel: Setup, Rotas, Controllers, Eloquent",
+                        Days=new(){
+                            new(){ Day="Seg", Task="Laravel Setup",
+                                Description="Instalar o PHP 8.x e o Composer para criar o primeiro projecto Laravel, compreendendo a estrutura de pastas do framework." },
+                            new(){ Day="Ter", Task="Rotas + Controllers",
+                                Description="Dominar o sistema de rotas (web.php e api.php) e criar Controllers utilizando os métodos de recursos do ecossistema." },
+                            new(){ Day="Qua", Task="Migrations Laravel",
+                                Description="Configurar a conexão com o banco de dados e entender as Migrations do Laravel — comparando directamente com as Migrations do EF Core." },
+                            new(){ Day="Qui", Task="Eloquent ORM",
+                                Description="Explorar o ORM Eloquent, criando os primeiros Models e realizando operações básicas — equivalente ao DbContext do EF Core." },
+                            new(){ Day="Sex", Task="API Catálogo de Filmes",
+                                Description="Iniciar o projecto prático 'API Catálogo de Filmes', criando os endpoints básicos de listagem e cadastro de títulos com Eloquent." },
+                            new(){ Day="Sáb", Task="Git + .env",
+                                Description="Configurar o Git para o projecto Laravel, organizar o ficheiro .env para segurança e fazer Push para o GitHub." }
+                        }},
+                    new Week { Number=45, Dates="29 Mar–04 Abr", Focus="API Resources, Middlewares, Sanctum",
+                        Days=new(){
+                            new(){ Day="Seg", Task="API Resources",
+                                Description="Implementar API Resources no Laravel para transformar e formatar a estrutura de dados retornada nas respostas JSON — equivalente aos DTOs do .NET." },
+                            new(){ Day="Ter", Task="Middlewares + Error Handling",
+                                Description="Criar filtros personalizados com Middlewares e centralizar o tratamento de erros e excepções da API." },
+                            new(){ Day="Qua", Task="Relações Eloquent + Eager Loading",
+                                Description="Configurar relações hasMany, belongsTo, belongsToMany e usar eager loading com with() para evitar o problema N+1." },
+                            new(){ Day="Qui", Task="Laravel Sanctum",
+                                Description="Instalar e configurar o Laravel Sanctum para autenticação baseada em tokens API — equivalente ao middleware de auth do .NET." },
+                            new(){ Day="Sex", Task="API Livraria Autenticada",
+                                Description="Construir a 'API Livraria Autenticada', onde apenas utilizadores com token válido podem gerir livros e autores." },
+                            new(){ Day="Sáb", Task="Seeders + Push",
+                                Description="Criar Seeders com Faker para popular o banco com dados de teste, validar o fluxo de autenticação e fazer Push." }
+                        }},
+                    new Week { Number=46, Dates="05–11 Abr", Focus="Projecto Laravel: API de Gestor de Tarefas",
+                        Days=new(){
+                            new(){ Day="Seg", Task="Modelagem do Banco",
+                                Description="Modelar o banco de dados de um 'Gestor de Tarefas' minimalista: tabelas de tarefas, categorias e utilizadores." },
+                            new(){ Day="Ter", Task="CRUD de Tarefas",
+                                Description="Implementar os endpoints de criação, listagem, actualização e remoção de tarefas usando Eloquent e API Resources." },
+                            new(){ Day="Qua", Task="Filtros e Status",
+                                Description="Adicionar filtros simples por status (pendente, concluída) e por categoria, usando query scopes do Eloquent." },
+                            new(){ Day="Qui", Task="Autenticação com Sanctum",
+                                Description="Proteger os endpoints do Gestor de Tarefas para que cada utilizador só veja e edite as suas próprias tarefas." },
+                            new(){ Day="Sex", Task="Testes Manuais + Polish",
+                                Description="Testar todos os endpoints no Postman, corrigir pequenos bugs e garantir respostas JSON consistentes." },
+                            new(){ Day="Sáb", Task="Documentação + Push",
+                                Description="Criar a documentação técnica do Gestor de Tarefas no GitHub, incluindo o diagrama do banco e instruções de execução." }
+                        }},
+                    new Week { Number=47, Dates="12–18 Abr", Focus="Docker Básico + Dockerfile",
+                        Days=new(){
+                            new(){ Day="Seg", Task="Conceito de Containers",
+                                Description="Compreender o conceito de contentorização, arquitectura do Docker e as vantagens de isolar ambientes de desenvolvimento." },
+                            new(){ Day="Ter", Task="docker run, ps, stop",
+                                Description="Transferir imagens prontas do Docker Hub e dominar os comandos básicos de execução de containers." },
+                            new(){ Day="Qua", Task="Anatomia do Dockerfile",
+                                Description="Entender a anatomia de um ficheiro Dockerfile, aprendendo o papel das instruções FROM, WORKDIR, COPY e RUN." },
+                            new(){ Day="Qui", Task="Expor Portas + App",
+                                Description="Configurar um Dockerfile específico para expor portas e correr uma aplicação Web (API .NET ou Laravel)." },
+                            new(){ Day="Sex", Task="docker build + run",
+                                Description="Construir a imagem local utilizando o comando docker build e executar o container da aplicação garantindo acesso externo." },
+                            new(){ Day="Sáb", Task=".dockerignore + Commit",
+                                Description="Criar um ficheiro .dockerignore para ignorar pastas pesadas (como vendor ou bin), testar o build limpo e commitar." }
+                        }},
+                    new Week { Number=48, Dates="19–25 Abr", Focus="Docker Compose",
+                        Days=new(){
+                            new(){ Day="Seg", Task="Por que o Compose?",
+                                Description="Compreender a necessidade do Docker Compose para gerir e orquestrar múltiplos containers locais com um único comando." },
+                            new(){ Day="Ter", Task="docker-compose.yml",
+                                Description="Estruturar o ficheiro docker-compose.yml, definindo a versão e declarando o primeiro serviço básico da aplicação web." },
+                            new(){ Day="Qua", Task="Serviço de BD",
+                                Description="Adicionar um serviço de banco de dados (MySQL) no Compose, configurando senhas e variáveis de ambiente iniciais." },
+                            new(){ Day="Qui", Task="up, down, logs, exec",
+                                Description="Dominar os comandos vitais do dia a dia do ecossistema Compose: docker-compose up, down, logs e exec." },
+                            new(){ Day="Sex", Task="API + BD no Compose",
+                                Description="Colocar a API back-end e o banco de dados a correr juntos, garantindo que a API aguarda o banco iniciar antes de conectar." },
+                            new(){ Day="Sáb", Task="Ciclo completo + Commit",
+                                Description="Validar o ciclo completo de subir e derrubar o ambiente multi-container de forma limpa e documentar os comandos no Git." }
+                        }},
+                    new Week { Number=49, Dates="26 Abr–02 Mai", Focus="Volumes + Networks + Segurança",
+                        Days=new(){
+                            new(){ Day="Seg", Task="Named Volumes",
+                                Description="Configurar Named Volumes no Docker Compose para garantir que os dados do banco não desaparecem ao derrubar o container." },
+                            new(){ Day="Ter", Task="Bind Mounts",
+                                Description="Praticar o uso de Bind Mounts para espelhar o código da máquina local dentro do container, permitindo live-reload em desenvolvimento." },
+                            new(){ Day="Qua", Task="Docker Networks",
+                                Description="Estudar o conceito de redes isoladas (Docker Networks) para gerir a comunicação interna segura entre os containers." },
+                            new(){ Day="Qui", Task="BD invisível externamente",
+                                Description="Configurar redes distintas no Compose para que o banco de dados fique invisível para o mundo externo, aceitando apenas conexões da API." },
+                            new(){ Day="Sex", Task=".env no Compose + Non-root User",
+                                Description="Integrar o ficheiro .env ao Docker Compose para injectar variáveis sensíveis e configurar containers para correrem sem privilégios de root." },
+                            new(){ Day="Sáb", Task=".env.example + .gitignore + Commit",
+                                Description="Adicionar um ficheiro .env.example claro, garantir que o .env real está no .gitignore e commitar as configurações de segurança." }
+                        }},
+                    new Week { Number=50, Dates="03–09 Mai", Focus="GitHub Actions CI/CD",
+                        Days=new(){
+                            new(){ Day="Seg", Task="Conceito CI/CD",
+                                Description="Entender os conceitos fundamentais de CI/CD (Integração e Entrega Contínuas) e a estrutura de automações do GitHub Actions." },
+                            new(){ Day="Ter", Task=".github/workflows/",
+                                Description="Criar a pasta .github/workflows/ no repositório e estruturar o primeiro ficheiro YAML de automação disparado por um Push." },
+                            new(){ Day="Qua", Task="Steps de Testes",
+                                Description="Configurar passos automáticos no workflow para instalar dependências e correr os testes unitários do back-end C# ou PHP." },
+                            new(){ Day="Qui", Task="Build Docker no CI",
+                                Description="Adicionar um passo final para simular o build da imagem Docker da aplicação dentro do servidor do GitHub Actions." },
+                            new(){ Day="Sex", Task="Pipeline Completo",
+                                Description="Unir os steps de testes, linting e build Docker num pipeline completo que valida todo o código a cada Pull Request." },
+                            new(){ Day="Sáb", Task="Falha intencional + Fix",
+                                Description="Forçar uma falha intencional num teste para validar se o GitHub Actions bloqueia o fluxo correctamente, corrigindo e commitando logo após." }
+                        }},
+                    new Week { Number=51, Dates="10–16 Mai", Focus="Cloud Computing — Fundamentos Azure/AWS",
+                        Days=new(){
+                            new(){ Day="Seg", Task="Conceitos de Cloud + Conta Gratuita",
+                                Description="Compreender os modelos IaaS, PaaS e SaaS, e criar uma conta gratuita na Azure ou AWS (free tier) para experimentação prática." },
+                            new(){ Day="Ter", Task="App Service / Elastic Beanstalk",
+                                Description="Explorar o serviço de hospedagem gerida da Azure (App Service) ou AWS (Elastic Beanstalk) para correr aplicações web sem gerir servidores manualmente." },
+                            new(){ Day="Qua", Task="Banco de Dados Gerido na Cloud",
+                                Description="Configurar uma instância de base de dados gerida (Azure Database for MySQL ou AWS RDS) e ligar a API .NET a ela." },
+                            new(){ Day="Qui", Task="Variáveis de Ambiente e Secrets",
+                                Description="Configurar variáveis de ambiente e segredos de forma segura na plataforma cloud, sem expor strings de conexão no código." },
+                            new(){ Day="Sex", Task="Deploy da Web API .NET na Cloud",
+                                Description="Publicar a Minimal API .NET (Semana 43) diretamente na Azure ou AWS, validando o acesso externo via HTTPS." },
+                            new(){ Day="Sáb", Task="Documentação + Push",
+                                Description="Documentar o processo de deploy na cloud com prints e comandos utilizados, e fazer Push para o GitHub." }
+                        }},
+                    new Week { Number=52, Dates="17–23 Mai", Focus="Cloud Computing — CI/CD e Escalabilidade",
+                        Days=new(){
+                            new(){ Day="Seg", Task="Pipeline CI/CD para a Cloud",
+                                Description="Configurar o GitHub Actions para fazer deploy automático na Azure/AWS sempre que houver push na branch principal." },
+                            new(){ Day="Ter", Task="Monitorização e Logs na Cloud",
+                                Description="Explorar as ferramentas nativas de monitorização (Azure Monitor / AWS CloudWatch) para acompanhar logs e métricas da aplicação em produção." },
+                            new(){ Day="Qua", Task="Escalabilidade Horizontal vs Vertical",
+                                Description="Compreender os conceitos de escalabilidade horizontal e vertical, e como configurar regras básicas de auto-scaling na plataforma escolhida." },
+                            new(){ Day="Qui", Task="Custos e Optimização",
+                                Description="Analisar o modelo de custos da cloud (pay-as-you-go) e aplicar boas práticas para evitar gastos inesperados no free tier." },
+                            new(){ Day="Sex", Task="Testes de Carga Simples",
+                                Description="Realizar testes de carga básicos na API publicada para observar o comportamento da aplicação sob múltiplas requisições simultâneas." },
+                            new(){ Day="Sáb", Task="Relatório Técnico Cloud + Push",
+                                Description="Escrever um relatório técnico resumindo a arquitectura de deploy, custos e decisões tomadas, e fazer Push." }
+                        }},
+                    new Week { Number=53, Dates="24–30 Mai", Focus="Mensageria e Sistemas Distribuídos — RabbitMQ",
+                        Days=new(){
+                            new(){ Day="Seg", Task="Conceitos de Mensageria Assíncrona",
+                                Description="Compreender o papel de filas de mensagens em sistemas distribuídos, e a diferença entre comunicação síncrona (HTTP) e assíncrona (mensageria)." },
+                            new(){ Day="Ter", Task="Setup RabbitMQ (Docker)",
+                                Description="Configurar uma instância local do RabbitMQ via Docker, explorando o painel de gestão e os conceitos de Exchange, Queue e Binding." },
+                            new(){ Day="Qua", Task="Publisher em C#",
+                                Description="Implementar um serviço Publisher em C# que envia mensagens para uma fila do RabbitMQ usando a biblioteca cliente oficial." },
+                            new(){ Day="Qui", Task="Consumer em C#",
+                                Description="Implementar um serviço Consumer em C# que escuta a fila e processa as mensagens recebidas de forma assíncrona." },
+                            new(){ Day="Sex", Task="Projecto: Notificações Assíncronas",
+                                Description="Integrar o RabbitMQ ao Sistema de Pedidos (Fase 1) para que a criação de um pedido publique uma mensagem processada por um serviço separado." },
+                            new(){ Day="Sáb", Task="Documentação + Push",
+                                Description="Documentar a arquitectura de mensageria com um diagrama do fluxo Publisher → Queue → Consumer, e fazer Push." }
+                        }},
+                    new Week { Number=54, Dates="31 Mai–06 Jun", Focus="Mensageria e Sistemas Distribuídos — MassTransit",
+                        Days=new(){
+                            new(){ Day="Seg", Task="MassTransit: Abstração sobre RabbitMQ",
+                                Description="Configurar o MassTransit como camada de abstração sobre o RabbitMQ, simplificando a configuração de Publishers e Consumers em .NET." },
+                            new(){ Day="Ter", Task="Mensagens Fortemente Tipadas",
+                                Description="Definir contratos de mensagens fortemente tipados em C# (records) e publicá-los através do MassTransit." },
+                            new(){ Day="Qua", Task="Retry Policies e Dead Letter Queue",
+                                Description="Configurar políticas de retentativa automática e filas de mensagens mortas (Dead Letter Queue) para mensagens que falham repetidamente." },
+                            new(){ Day="Qui", Task="Saga Pattern (Introdução)",
+                                Description="Compreender o Saga Pattern para coordenar transacções de longa duração entre múltiplos serviços distribuídos." },
+                            new(){ Day="Sex", Task="Refatorar Projecto de Mensageria",
+                                Description="Migrar o projecto de notificações da semana anterior de RabbitMQ puro para MassTransit, comparando a produtividade entre as duas abordagens." },
+                            new(){ Day="Sáb", Task="Portfólio: Mensageria + Tag v1.0 🎉",
+                                Description="Publicar o projecto de mensageria distribuída no GitHub com diagrama de arquitectura, README técnico e aplicar a tag v1.0." }
+                        }},
+                    new Week { Number=55, Dates="07–13 Jun", Focus="Dashboard com Previsão IA – parte 1",
+                        Days=new(){
+                            new(){ Day="Seg", Task="Escopo do Dashboard",
+                                Description="Definir as regras de negócio e escopo do 'Dashboard de Previsão', integrando o modelo ML.NET construído na Fase 4." },
+                            new(){ Day="Ter", Task="BD para Histórico",
+                                Description="Mapear o banco de dados relacional para armazenar o histórico de registos necessários para alimentar a lógica preditiva." },
+                            new(){ Day="Qua", Task="Serviço de Dados para ML",
+                                Description="Desenvolver no back-end o serviço que extrai o histórico e formata os dados no padrão exigido pelo modelo treinado em ML.NET." },
+                            new(){ Day="Qui", Task="Interface do Painel",
+                                Description="Construir a interface visual do painel administrativo utilizando tabelas dinâmicas e estruturas limpas." },
+                            new(){ Day="Sex", Task="Endpoints Histórico + IA",
+                                Description="Criar os endpoints da API que expõem os dados históricos combinados com as tendências calculadas pela IA." },
+                            new(){ Day="Sáb", Task="Validar Queries + Push",
+                                Description="Validar a integridade das consultas SQL geradas pelo ORM no banco de dados do Dashboard e efectuar o Push no repositório." }
+                        }},
+                    new Week { Number=56, Dates="14–20 Jun", Focus="Dashboard com Previsão IA – parte 2",
+                        Days=new(){
+                            new(){ Day="Seg", Task="Recharts / Chart.js",
+                                Description="Instalar uma biblioteca de gráficos performática no front-end para visualizar os dados históricos e as projecções da IA." },
+                            new(){ Day="Ter", Task="Gráficos Histórico + Projecção",
+                                Description="Alimentar os gráficos com os dados históricos e a linha de projecção futura retornados pela API inteligente." },
+                            new(){ Day="Qua", Task="Filtros Temporais",
+                                Description="Implementar filtros temporais dinâmicos no front-end que actualizam instantaneamente os gráficos exibidos na tela." },
+                            new(){ Day="Qui", Task="Exportação CSV",
+                                Description="Adicionar um módulo de exportação para que o administrador possa transferir os dados preditivos em formato CSV." },
+                            new(){ Day="Sex", Task="Responsividade Mobile",
+                                Description="Realizar testes de usabilidade e refatorar componentes visuais para garantir total responsividade em telas mobile e desktop." },
+                            new(){ Day="Sáb", Task="Deploy Dashboard + Push",
+                                Description="Subir o sistema de Dashboard completo integrado com IA para o GitHub e actualizar o link de demonstração da aplicação." }
+                        }},
+                    new Week { Number=57, Dates="21–27 Jun", Focus="Sistema Recomendador – parte 1",
+                        Days=new(){
+                            new(){ Day="Seg", Task="Filtragem Colaborativa",
+                                Description="Estudar o conceito de sistemas de recomendação por Filtragem Colaborativa baseada em fatoração de matrizes utilizando ML.NET." },
+                            new(){ Day="Ter", Task="Dataset de Interacções",
+                                Description="Estruturar o dataset de exemplo contendo interacções de utilizadores (avaliações, gostos ou visualizações de produtos/conteúdos)." },
+                            new(){ Day="Qua", Task="MatrixFactorizationTrainer",
+                                Description="Configurar o pipeline de treino específico do algoritmo MatrixFactorizationTrainer disponível no framework da Microsoft." },
+                            new(){ Day="Qui", Task="Treinar + Hiperparâmetros",
+                                Description="Treinar o modelo de recomendação e ajustar hiperparâmetros vitais como o número de iterações e factor de aproximação." },
+                            new(){ Day="Sex", Task="Testar Saída",
+                                Description="Testar a saída gerada fornecendo o ID de um utilizador fictício e validando a lista de notas previstas para itens não consumidos." },
+                            new(){ Day="Sáb", Task="Persistir Modelo + Push",
+                                Description="Persistir o modelo recomendador gerado em formato físico compactado e versionar a estrutura de treino no Git." }
+                        }},
+                    new Week { Number=58, Dates="28 Jun–04 Jul", Focus="Sistema Recomendador – parte 2",
+                        Days=new(){
+                            new(){ Day="Seg", Task="Endpoint de Recomendações",
+                                Description="Criar na API back-end um endpoint que recebe o identificador do utilizador logado e processa a lista de recomendações." },
+                            new(){ Day="Ter", Task="Query IDs → Produtos",
+                                Description="Implementar uma query eficiente para cruzar os IDs recomendados pela IA com os dados reais dos produtos guardados no banco." },
+                            new(){ Day="Qua", Task="Carrossel no Front-end",
+                                Description="Desenvolver o componente visual de 'Recomendados para Você' (no estilo carrossel de produtos) na interface." },
+                            new(){ Day="Qui", Task="Consumir Endpoint no Front",
+                                Description="Consumir o endpoint preditivo no front-end renderizando os itens recomendados de forma personalizada por perfil logado." },
+                            new(){ Day="Sex", Task="Testes por Perfil",
+                                Description="Realizar uma bateria de testes simulando diferentes perfis de comportamento para verificar a variação das recomendações exibidas." },
+                            new(){ Day="Sáb", Task="README + Push Final",
+                                Description="Finalizar o código do Sistema Recomendador, documentar o fluxo lógico no README principal e realizar o Push final do projecto." }
+                        }},
+                    new Week { Number=59, Dates="05–11 Jul", Focus="Auditoria Geral de Código",
+                        Days=new(){
+                            new(){ Day="Seg", Task="Refatorar C# Antigo",
+                                Description="Abrir os repositórios mais antigos (C# inicial) e caçar funções obsoletas, aplicando boas práticas modernas da linguagem." },
+                            new(){ Day="Ter", Task="Linters JS/TS",
+                                Description="Passar ferramentas de varredura estática de estilo e formatação (linters) em todos os códigos JS/TS para unificar o padrão visual." },
+                            new(){ Day="Qua", Task="Remover Código Morto",
+                                Description="Eliminar trechos de código duplicados ou mortos, variáveis declaradas sem uso e comentários temporários de depuração." },
+                            new(){ Day="Qui", Task="Quebrar Classes Gigantes",
+                                Description="Refatorar classes ou controllers gigantes que violam as regras do SOLID, quebrando-os em ficheiros menores focados." },
+                            new(){ Day="Sex", Task="Actualizar Dependências",
+                                Description="Actualizar pacotes e dependências vulneráveis listadas nos ficheiros package.json ou ficheiros de projecto NuGet do .NET." },
+                            new(){ Day="Sáb", Task="Correr Todos os Testes",
+                                Description="Correr todas as suítes de testes locais para garantir que nenhuma refatoração quebrou as regras vigentes do app e commitar." }
+                        }},
+                    new Week { Number=60, Dates="12–18 Jul", Focus="Deploy Definitivo em Nuvem",
+                        Days=new(){
+                            new(){ Day="Seg", Task="Railway / Render / Supabase",
+                                Description="Criar contas em servidores de nuvem estáveis (Railway, Render, Supabase) para centralizar a hospedagem das bases SQL." },
+                            new(){ Day="Ter", Task="Deploy APIs Back-end",
+                                Description="Configurar as instâncias de produção para as APIs back-end .NET e Laravel, injectando strings de conexão reais de forma oculta." },
+                            new(){ Day="Qua", Task="Deploy Front-ends",
+                                Description="Publicar os front-ends conectando-os aos links estáveis e seguros (HTTPS) das APIs em produção." },
+                            new(){ Day="Qui", Task="Testes em Produção",
+                                Description="Testar fluxos de cadastros e uploads completos nos sites publicados, verificando logs remotos para caçar quebras de rede." },
+                            new(){ Day="Sex", Task="Monitoramento de Uptime",
+                                Description="Configurar rotinas automáticas de monitoramento de instâncias para receber alertas caso os sites caiam." },
+                            new(){ Day="Sáb", Task="Lista de Links Públicos",
+                                Description="Organizar uma lista centralizada contendo todos os links públicos gerados que funcionam de verdade na internet." }
+                        }},
+                    new Week { Number=61, Dates="19–25 Jul", Focus="Engenharia de READMEs Comerciais",
+                        Days=new(){
+                            new(){ Day="Seg", Task="Template Comercial",
+                                Description="Estruturar um template visual padrão de documentação comercial focado no interesse visual de recrutadores de tech." },
+                            new(){ Day="Ter", Task="Problema de Negócios",
+                                Description="Escrever introduções textuais que explicam o problema real de negócios que o projecto resolve antes de falar de código." },
+                            new(){ Day="Qua", Task="Prints + Diagramas",
+                                Description="Inserir prints de alta qualidade das telas ou diagramas de infraestrutura claros que expliquem o fluxo de dados." },
+                            new(){ Day="Qui", Task="Stack de Tecnologias",
+                                Description="Listar de forma explícita e organizada as tecnologias mais relevantes de mercado utilizadas na construção de cada projecto." },
+                            new(){ Day="Sex", Task="Secção 'Como Executar'",
+                                Description="Adicionar uma secção curta e directa de 'Como Executar', simplificando comandos para que qualquer programador consiga correr." },
+                            new(){ Day="Sáb", Task="Rever + Publicar READMEs",
+                                Description="Rever a gramática, alinhar as tabelas em Markdown dos ficheiros e actualizar os repositórios principais no GitHub." }
+                        }},
+                    new Week { Number=62, Dates="26 Jul–01 Ago", Focus="GitHub Profile Master",
+                        Days=new(){
+                            new(){ Day="Seg", Task="Repositório Especial",
+                                Description="Criar o repositório especial com o próprio nome de utilizador para desbloquear a aba de biografia principal do perfil." },
+                            new(){ Day="Ter", Task="Resumo Profissional",
+                                Description="Escrever um resumo profissional dinâmico destacando as competências chave como Engenheiro Full-Stack com experiência em IA." },
+                            new(){ Day="Qua", Task="Badges de Tecnologias",
+                                Description="Utilizar badges visuais organizadas por categorias (Linguagens, Frameworks, Bases de Dados, DevOps) para facilitar a leitura." },
+                            new(){ Day="Qui", Task="Fixar 4 Projectos no Topo",
+                                Description="Fixar (Pin) estrategicamente no topo do perfil os 4 projectos mais complexos e polidos construídos ao longo do plano." },
+                            new(){ Day="Sex", Task="LinkedIn + Currículo",
+                                Description="Configurar o link directo para o LinkedIn e currículo digital actualizado na secção de informações de contacto do GitHub." },
+                            new(){ Day="Sáb", Task="Ver perfil anónimo",
+                                Description="Observar o perfil renderizado no modo anónimo para simular a visão exacta do recrutador, ajustar pequenos detalhes e finalizar." }
+                        }},
+                    new Week { Number=63, Dates="02–08 Ago", Focus="Currículo Optimizado",
+                        Days=new(){
+                            new(){ Day="Seg", Task="Modelo ATS-friendly",
+                                Description="Estruturar o currículo em modelo textual limpo (sem colunas duplas ou gráficos de estrelas) para passar facilmente por robôs de RH." },
+                            new(){ Day="Ter", Task="Descrever Experiências",
+                                Description="Escrever as descrições das experiências focando nas acções técnicas tomadas e nos resultados práticos gerados nas apps." },
+                            new(){ Day="Qua", Task="Keywords de Mercado",
+                                Description="Injectar as palavras-chave mais procuradas do mercado (ex: .NET, Next.js, Docker, REST API, ML.NET) nas secções certas do texto." },
+                            new(){ Day="Qui", Task="LinkedIn Sincronizado",
+                                Description="Actualizar o perfil do LinkedIn sincronizando as informações textuais presentes no documento do currículo." },
+                            new(){ Day="Sex", Task="Competências LinkedIn",
+                                Description="Configurar a secção de Competências do LinkedIn, associando cada tecnologia chave aos respectivos projectos fixados." },
+                            new(){ Day="Sáb", Task="Exportar PDF Final",
+                                Description="Exportar o ficheiro definitivo do currículo em formato PDF e guardá-lo em local de acesso rápido para envio imediato." }
+                        }},
+                    new Week { Number=64, Dates="09–15 Ago", Focus="Mock Interviews",
+                        Days=new(){
+                            new(){ Day="Seg", Task="Perguntas Comportamentais",
+                                Description="Estudar as 10 principais perguntas comportamentais de RH e rascunhar respostas estruturadas." },
+                            new(){ Day="Ter", Task="Técnica STAR",
+                                Description="Aplicar a técnica STAR (Situação, Tarefa, Acção, Resultado) para estruturar as respostas de forma corporativa." },
+                            new(){ Day="Qua", Task="Revisão Teórica SOLID + SQL",
+                                Description="Rever a teoria pura de arquitectura: conceitos profundos de SOLID, funcionamento de índices SQL e ciclos de vida de APIs REST." },
+                            new(){ Day="Qui", Task="LeetCode / HackerRank",
+                                Description="Praticar desafios rápidos de código e lógica em plataformas como LeetCode ou HackerRank para desbloquear o raciocínio sob pressão." },
+                            new(){ Day="Sex", Task="Gravar Respostas em Áudio",
+                                Description="Gravar áudios respondendo às perguntas para polir a oratória, eliminar vícios de linguagem e ajustar o tempo de fala." },
+                            new(){ Day="Sáb", Task="Identificar Fraquezas",
+                                Description="Mapear as maiores fraquezas teóricas com base nos treinos e fazer revisões dirigidas em tópicos que geraram insegurança." }
+                        }},
+                    new Week { Number=65, Dates="16–22 Ago", Focus="Aplicação de Vagas",
+                        Days=new(){
+                            new(){ Day="Seg", Task="Filtros no LinkedIn + Gupy",
+                                Description="Configurar filtros de buscas diárias nos portais de emprego (LinkedIn, Gupy) guardando termos focados em vagas Jr/Pleno." },
+                            new(){ Day="Ter", Task="Candidaturas Personalizadas",
+                                Description="Enviar as primeiras candidaturas personalizadas, lendo os requisitos das vagas e ajustando detalhes pontuais do currículo." },
+                            new(){ Day="Qua", Task="Rastrear Tech Leads",
+                                Description="Rastrear engenheiros líderes ou tech leads das empresas das vagas abertas e adicioná-los à rede de contactos." },
+                            new(){ Day="Qui", Task="Mensagens Directas",
+                                Description="Enviar mensagens directas curtas, profissionais e personalizadas para esses líderes apresentando o portfólio focado em soluções." },
+                            new(){ Day="Sex", Task="Folha de Controlo",
+                                Description="Alimentar uma folha de controlo centralizada anotando o nome da empresa, link da vaga, data do envio e contactos internos." },
+                            new(){ Day="Sáb", Task="Analisar Volume + Respostas",
+                                Description="Analisar o volume de envios da semana, limpar e responder às primeiras mensagens automáticas recebidas nas plataformas de vagas." }
+                        }},
+                    new Week { Number=66, Dates="23–29 Ago", Focus="Triagens + Desafios Técnicos",
+                        Days=new(){
+                            new(){ Day="Seg", Task="Triagens por Telefone",
+                                Description="Atender prontamente aos primeiros chamados de recrutadores para triagens rápidas por telefone ou mensagens no LinkedIn." },
+                            new(){ Day="Ter", Task="Testes Técnicos",
+                                Description="Iniciar a resolução de testes técnicos práticos de código enviados pelas empresas de RH." },
+                            new(){ Day="Qua", Task="Clean Code nos Testes",
+                                Description="Manter o foco na arquitectura limpa e testes unitários mesmo em projectos de testes de processos, mantendo o padrão alto." },
+                            new(){ Day="Qui", Task="Follow-up nas Candidaturas",
+                                Description="Enviar mensagens cordiais de acompanhamento para empresas que aplicou na semana anterior e que estão em silêncio." },
+                            new(){ Day="Sex", Task="Entregar Testes com README",
+                                Description="Entregar os testes técnicos resolvidos dentro dos prazos estipulados, enviando links organizados com READMEs explicativos." },
+                            new(){ Day="Sáb", Task="Actualizar Folha",
+                                Description="Actualizar a folha de prospecção com os novos status dos processos activos (Avançou, Rejeitado, Aguardando)." }
+                        }},
+                    new Week { Number=67, Dates="30 Ago–05 Set", Focus="Entrevistas de Fit e Técnicas",
+                        Days=new(){
+                            new(){ Day="Seg", Task="Entrevistas de Fit Cultural",
+                                Description="Entrar nas primeiras chamadas de vídeo de fit cultural, focando em demonstrar excelente comunicação, energia alta e soft skills." },
+                            new(){ Day="Ter", Task="Defender o Portfólio",
+                                Description="Participar de entrevistas técnicas defendendo os projectos do portfólio ao vivo em telas partilhadas com os avaliadores." },
+                            new(){ Day="Qua", Task="Live Coding",
+                                Description="Resolver exercícios de live coding mantendo a calma, pensando em voz alta para que os avaliadores entendam a lógica." },
+                            new(){ Day="Qui", Task="Perguntas para o Time",
+                                Description="Fazer perguntas maduras sobre a cultura de engenharia e os desafios reais do time da empresa ao final de cada entrevista." },
+                            new(){ Day="Sex", Task="Anotar Perguntas Difíceis",
+                                Description="Anotar em bloco de notas todas as perguntas técnicas difíceis que não soube responder para estudar a teoria logo após." },
+                            new(){ Day="Sáb", Task="Descansar + Reflectir",
+                                Description="Descansar a mente das conversas exaustivas da semana, avaliar os erros de postura e recarregar o foco para a reta final." }
+                        }},
+                    new Week { Number=68, Dates="06–12 Set", Focus="Análise de Propostas + Contratação",
+                        Days=new(){
+                            new(){ Day="Seg", Task="Receber Ofertas",
+                                Description="Receber os primeiros feedbacks positivos e ofertas de contratação formais encaminhadas por e-mail pelos times de RH." },
+                            new(){ Day="Ter", Task="Analisar Propostas",
+                                Description="Analisar friamente as propostas considerando salários brutos, benefícios reais oferecidos e a qualidade do plano de carreira." },
+                            new(){ Day="Qua", Task="Negociação Profissional",
+                                Description="Conduzir rondas de negociação profissional caso os valores fiquem abaixo do mercado, argumentando com base no portfólio." },
+                            new(){ Day="Qui", Task="Aceitar + Assinar",
+                                Description="Aceitar formalmente a melhor proposta recebida, assinar os documentos de admissão e alinhar a data de início (Onboarding)." },
+                            new(){ Day="Sex", Task="Preparar Setup",
+                                Description="Organizar o ambiente físico de trabalho, limpar a máquina local e preparar o setup para o primeiro dia útil como Dev." },
+                            new(){ Day="Sáb", Task="Post no LinkedIn 🎉",
+                                Description="Fazer a publicação final de conquista no LinkedIn detalhando a trajectória de 72 semanas de esforço e celebrar a vaga!" }
+                        }},
+                    new Week { Number=69, Dates="13–19 Set", Focus="Buffer: Segundo Round + Networking",
+                        Days=new(){
+                            new(){ Day="Seg", Task="Ampliar Rede de Contactos",
+                                Description="Semana reservada para casos onde o processo selectivo esteja mais demorado. Expandir a rede no LinkedIn e participar de comunidades técnicas." },
+                            new(){ Day="Ter", Task="Novos Processos Selectivos",
+                                Description="Aplicar para novas vagas caso os processos anteriores não tenham avançado, mantendo o volume de candidaturas constante." },
+                            new(){ Day="Qua", Task="Revisão de Pontos Fracos",
+                                Description="Revisitar tópicos técnicos que geraram insegurança nas entrevistas anteriores, aprofundando o estudo teórico e prático." },
+                            new(){ Day="Qui", Task="Contribuição Open Source",
+                                Description="Encontrar um repositório open source relevante no GitHub e contribuir com uma pequena melhoria ou correcção de bug para enriquecer o perfil." },
+                            new(){ Day="Sex", Task="Portfólio: Pequenas Melhorias",
+                                Description="Implementar pequenas melhorias visuais ou funcionais nos projectos do portfólio com base no feedback recebido nas entrevistas." },
+                            new(){ Day="Sáb", Task="Actualizar Folha de Candidaturas",
+                                Description="Rever o status de todos os processos activos, arquivar os rejeitados e planear os próximos movimentos da semana seguinte." }
+                        }},
+                    new Week { Number=70, Dates="20–26 Set", Focus="Buffer: Preparação para Início",
+                        Days=new(){
+                            new(){ Day="Seg", Task="Onboarding Mental",
+                                Description="Semana de transição — se já foi contratado, preparar-se mental e tecnicamente para o primeiro dia de trabalho." },
+                            new(){ Day="Ter", Task="Rever Clean Architecture",
+                                Description="Rever os conceitos de Clean Architecture e arquitecturas em camadas que serão exigidos no ambiente profissional." },
+                            new(){ Day="Qua", Task="Git Flow Profissional",
+                                Description="Praticar o fluxo profissional de branches (feature, hotfix, release) e o processo completo de Pull Request com revisão de código." },
+                            new(){ Day="Qui", Task="Configurar Ambiente de Trabalho",
+                                Description="Configurar todas as ferramentas, extensões e atalhos do ambiente de desenvolvimento para máxima produtividade no novo emprego." },
+                            new(){ Day="Sex", Task="Retrospectiva das 72 Semanas",
+                                Description="Escrever uma retrospectiva pessoal documentando os maiores aprendizados, erros e conquistas das 72 semanas do plano de estudos." },
+                            new(){ Day="Sáb", Task="Plano de Crescimento Futuro 🚀",
+                                Description="Definir os próximos objectivos de aprendizado para os próximos 12 meses como programador profissional e celebrar a jornada!" }
+                        }},
+                    new Week { Number=71, Dates="27 Set–03 Out", Focus="Buffer Flexível 1",
+                        Days=new(){
+                            new(){ Day="Seg–Sáb", Task="Semana Reservada",
+                                Description="Semana de buffer reservada para atrasos em projectos anteriores, aprofundamento de temas específicos ou início do onboarding no novo emprego." }
+                        }},
+                    new Week { Number=72, Dates="04–07 Out", Focus="Consolidação Final 🎓",
+                        Days=new(){
+                            new(){ Day="Seg", Task="Retrospectiva Final",
+                                Description="Realizar uma retrospectiva completa de todo o plano de 72 semanas, documentando a evolução técnica e pessoal alcançada." },
+                            new(){ Day="Ter", Task="Actualizar Todo o Portfólio",
+                                Description="Fazer uma última passagem em todos os repositórios do GitHub garantindo que READMEs, links e demos estão a funcionar." },
+                            new(){ Day="Qua", Task="LinkedIn Final",
+                                Description="Publicar um post detalhado no LinkedIn sobre a jornada completa, as tecnologias aprendidas e os projectos construídos." },
+                            new(){ Day="Qui", Task="Celebração 🎉",
+                                Description="Celebrar a conclusão do plano de 72 semanas. Reconhecer o esforço, a consistência e a evolução alcançada desde maio de 2026." }
+                        }},
+                }
+            },
+        };
 
-            _cachedPhases = phases;
-            return _cachedPhases;
-        }
-    }
-
-    // Optional: method to reload if the JSON file changes (for hot-reload scenarios)
-    public static void InvalidateCache()
-    {
-        lock (_lock)
+        var phaseStartDates = new Dictionary<int, DateTime>
         {
-            _cachedPhases = null;
+            { 1, new DateTime(2026, 5, 18) },
+            { 2, new DateTime(2026, 7, 20) },
+            { 3, new DateTime(2026, 11, 9) },
+            { 4, new DateTime(2027, 1, 4) },
+            { 5, new DateTime(2027, 3, 1) },
+        };
+
+        foreach (var phase in phases)
+        {
+            var start = phaseStartDates[phase.Id];
+            foreach (var week in phase.Weeks)
+            {
+                DateTime weekStart;
+                if (phase.Id == 1 && week.Number >= 4)
+                {
+                    weekStart = new DateTime(2026, 6, 15).AddDays((week.Number - 4) * 7);
+                }
+                else
+                {
+                    weekStart = start.AddDays((week.Number - phase.Weeks.First().Number) * 7);
+                }
+                var weekEnd = weekStart.AddDays(6);
+                week.IsCurrent = today >= weekStart && today <= weekEnd;
+                week.IsDone = today > weekEnd;
+            }
         }
+
+        int dayId = 1;
+        foreach (var week in phases.SelectMany(p => p.Weeks))
+        foreach (var day in week.Days)
+            day.UniqueId = dayId++;
+
+        return phases;
     }
 }

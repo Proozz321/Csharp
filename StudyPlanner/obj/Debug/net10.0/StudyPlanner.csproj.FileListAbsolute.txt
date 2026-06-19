@@ -90,3 +90,4 @@
 /home/marcus/StudyPlanner/obj/Debug/net10.0/StudyPla.8D211E4B.Up2Date
 /home/marcus/StudyPlanner/obj/Debug/net10.0/StudyPlanner.genruntimeconfig.cache
 /home/marcus/StudyPlanner/obj/Debug/net10.0/ref/StudyPlanner.dll
+/home/marcus/StudyPlanner/obj/Debug/net10.0/StudyPlanner.sourcelink.json

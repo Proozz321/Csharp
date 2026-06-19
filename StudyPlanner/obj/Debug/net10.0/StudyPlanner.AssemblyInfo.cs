@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("StudyPlanner")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d237c9bbd5716c8fce7eb680e960436435129ab0")]
 [assembly: System.Reflection.AssemblyProductAttribute("StudyPlanner")]
 [assembly: System.Reflection.AssemblyTitleAttribute("StudyPlanner")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
